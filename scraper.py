@@ -1,24 +1,11 @@
 import sys, urllib2
 sys.path.insert(0, 'libs')
-from google.appengine.ext import db
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from Queue import Queue
 from threading import Thread
+from models import UnivClass
 
-
-class UnivClass(db.Model):
-	created = db.DateTimeProperty(auto_now_add=True)
-	subj_code = db.StringProperty()
-	course_no = db.StringProperty()
-	class_type = db.StringProperty()
-	method = db.StringProperty()
-	sec = db.StringProperty()
-	title = db.StringProperty()
-	days = db.StringProperty()
-	time = db.StringProperty()
-	instructor = db.StringProperty()
-	
 def get_subjects():
     while True:
         url = url_queue.get()
@@ -45,7 +32,8 @@ def get_classes():
             except:
                 pass
         subject_page = BeautifulSoup(html)
-        classes = subject_page.find("table", {"bgcolor":"#cccccc"})
+        term = subject_page.find("td", {"class":"title"}).text.split(' for ')[1]
+	classes = subject_page.find("table", {"bgcolor":"#cccccc"})
         classes = classes.findAll("tr")
         for uni_class in classes:
             if uni_class.find("a"):
@@ -54,17 +42,24 @@ def get_classes():
 		course["subj_code"] = items[0].text
 		course["course_no"] = items[1].text
 		course["type"] = items[2].text
-		course["method"] = items[3].text
 		course["sec"] = items[4].text
 		course["CRN"] = items[5].text
-		course["title"] = items[6].text
+		course["title"] = items[6].text.lower().replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"') .replace('&#39;', "'").split(" ")
 		course["days"] = items[8].text
 		course["time"] = items[9].text
 		course["instructor"] = items[len(items)-1].text
 
-		new_class = UnivClass(key_name=course["CRN"], subj_code=course["subj_code"], course_no=course["course_no"],
-					class_type=course["type"], method=course["method"], sec=course["sec"], title=course["title"],
-					days=course["days"], time=course["time"], instructor=course["instructor"])		
+		new_class = UnivClass(key_name=course["CRN"],
+				      term=term,
+				      subj_code=course["subj_code"],
+				      course_no=course["course_no"],
+				      class_type=course["type"], 
+				      sec=course["sec"], 
+				      title=course["title"],
+				      days=course["days"], 
+				      time=course["time"], 
+				      instructor=course["instructor"])		
+		
 		new_class.put()
 
         url_queue2.task_done()

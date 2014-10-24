@@ -22,6 +22,9 @@ handlers:
 - url: /.*
   script: schedulemeister.application
 
+- url: /remoteapi.*
+  script: google.appengine.ext.remote_api.handler.application
+  login: admin
 
 libraries:
 - name: webapp2

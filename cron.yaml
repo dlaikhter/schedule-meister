@@ -1,5 +1,8 @@
 cron:
 - description: scraper
   url: /scraper
-  schedule: every monday 09:00
+  schedule: every monday 9:00
 
+#- description: deleter
+#  url: /deleter
+#  schedule: every 1  mins

@@ -1,36 +1,45 @@
 import os, urllib, webapp2, jinja2, json
-from google.appengine.ext import db
+from models import UnivClass
+
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-class UnivClass(db.Model):
-	created = db.DateTimeProperty(auto_now_add=True)
-	subj_code = db.StringProperty()
-	course_no = db.StringProperty()
-	class_type = db.StringProperty()
-	method = db.StringProperty()
-	sec = db.StringProperty()
-	title = db.StringProperty()
-	days = db.StringProperty()
-	time = db.StringProperty()
-	instructor = db.StringProperty()
+def class_to_json(course):
+	return {"subj_code":course.subj_code,
+                "CRN":crn,
+                "course_no":course.course_no,
+                "class_type":course.class_type,
+                "sec":course.sec,
+                "title":course.title,
+                "days":course.days,
+                "time":course.time,
+                "instructor":course.instructor,
+                "term":course.term}
 
-def fetch_class(crn):
-	course = UnivClass.get_by_key_name(str(crn))
-	returned_json = {"subj_code":course.subj_code, "CRN":crn,
-			"course_no":course.course_no, "class_type":course.class_type,
-			"method":course.method, "sec":course.sec, "title":course.title,
-			"days":course.days, "time":course.time, "instructor":course.instructor}
-	return json.dumps(returned_json)
+def query_classes(fetch_request):
+	query_by = fetch_request["by"]
+	
+	if query_by == "crn":
+		course = UnivClass.get_by_key_name(str(fetch_request["crn"]))
+		course = class_to_json(course)
+		return json.dumps(course)
+	else:
+		courses_json_list = []
+		courses = UnivClass.gql("SELECT * FROM title WHERE term IN :term", term=quarter)
+	
+		for course in courses:	
+			course_json = class_to_json(course)
+			courses_json_list.append(course_json)
+
+		return json.dumps([dict(mpn=pn) for pn in courses_json_list])
 
 class MainPage(webapp2.RequestHandler):
-
     def get(self):
-	if self.request.get('id'):
-		crn = self.request.get('id')
-		self.response.out.write(fetch_class(crn))
+	if self.request.get('fetch_request'):
+		request = self.request.get('fetch_request')
+		self.response.out.write(query_classes(crn))
 	else:
 		template = JINJA_ENVIRONMENT.get_template('index.html')
 		self.response.write(template.render())

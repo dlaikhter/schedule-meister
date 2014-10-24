@@ -140,50 +140,63 @@ function click_class(e, canvas){
     }
 }
 
-function get_class_by_crn(){
-	var crn = $("#crn_input").val();
-	$.ajax({url:"/", type:'GET',data: {'id':crn}, success:
-	function(data){
-		var class_dict = JSON.parse(data);
-		var new_class = new univ_class();		
-		var days = class_dict["days"];
-		var days_of_class = [];
-		var times = class_dict["time"];		
-		var week = ['M','T','W','R','F','S'];
-		for(var i in week){				
-			if(days.search(week[i]) != -1){
-				days_of_class.push(i);
+function query_classes(){
+	if($("#query_select").text() == "CRN"){
+		var crn = $("#crn_input").val();
+		$.ajax({url:"/",
+			type:'GET',
+			data: {'id':crn}, 
+			success: function(data){
+					var class_dict = JSON.parse(data);
+					var new_class = new univ_class();		
+					var days = class_dict["days"];
+					var days_of_class = [];
+					var times = class_dict["time"];		
+					var week = ['M','T','W','R','F','S'];
+					for(var i in week){				
+						if(days.search(week[i]) != -1){
+							days_of_class.push(i);
+						}
+					}
+					new_class.days_of_week = days_of_class;
+					times = times.split("-");
+					for(var i in times){
+						times[i] = times[i].replace(" ","");
+						times[i] = times[i].replace(" ","");
+						if(times[i].charAt(0) == "0"){
+							times[i] = times[i].substring(1);			
+						}		
+					}
+					new_class.start_time = times[0];
+					new_class.start = timestring_to_time(times[0]);
+					new_class.end_time = times[1];
+					new_class.end = timestring_to_time(times[1]);
+					new_class.color = $("#color_picker2").val();
+					new_class.name = class_dict["subj_code"].concat(" ");
+					new_class.name = new_class.name.concat(class_dict["course_no"]);
+					new_class.name = new_class.name.concat(" - ");
+					new_class.name = new_class.name.concat(class_dict["sec"]);
+					new_class.crn = class_dict["CRN"];
+					console.log(new_class.crn);
+					if(error_check(new_class)){
+						localStorage[new_class.name] = JSON.stringify(new_class);
+						$("#class_select").append( $('<option></option>').val(new_class.name).html(new_class.name + " - " + new_class.crn));
+						draw_classes();
+						reset_form();
+					}
+		}});
+	}
+	else{
+		var title = $("#crn_input").val();
+		$.ajax({url:"/",
+			type:'GET',
+			data: {'title':crn}, 
+			success:function(data){
+				console.log(JSON.parse(data));
 			}
-		}
-		new_class.days_of_week = days_of_class;
-		times = times.split("-");
-		for(var i in times){
-			times[i] = times[i].replace(" ","");
-			times[i] = times[i].replace(" ","");
-			if(times[i].charAt(0) == "0"){
-				times[i] = times[i].substring(1);			
-			}		
-		}
-		new_class.start_time = times[0];
-		new_class.start = timestring_to_time(times[0]);
-		new_class.end_time = times[1];
-		new_class.end = timestring_to_time(times[1]);
-		new_class.color = $("#color_picker2").val();
-		new_class.name = class_dict["subj_code"].concat(" ");
-		new_class.name = new_class.name.concat(class_dict["course_no"]);
-		new_class.name = new_class.name.concat(" - ");
-		new_class.name = new_class.name.concat(class_dict["sec"]);
-		new_class.crn = class_dict["CRN"];
-		console.log(new_class.crn);
-		if(error_check(new_class)){
-			localStorage[new_class.name] = JSON.stringify(new_class);
-			$("#class_select").append( $('<option></option>').val(new_class.name).html(new_class.name + " - " + new_class.crn));
-			draw_classes();
-			reset_form();
-		}
-	}});
+		});
+	}
 }
-
 
 function set_schedule_item()
 {
