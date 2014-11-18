@@ -9,7 +9,7 @@
 		<div id=uiwrapper>
 		<div id="buttonwrapper">
 		<div id="button1" class="button">manual</div>
-		<div id="button2" class="button" style="background-color:#97ADA6">by crn</div></div>
+		<div id="button2" class="button" style="background-color:#97ADA6">find class</div></div>
 		<div id="ui">
 			<div id="ui1" class="uiclass">
 				class name: <input id="class_name" maxlength="50">
@@ -108,9 +108,12 @@
 				<option>CRN</option>
 				<option>SUBJECT</option>		
 				<option>NAME</option>
-			</select>
-			<br>
-			crn: <input id="crn_input"><input type="button" value="add class" onclick="query_classes()">			
+			</select><br>
+            subject: 
+            <select id="subject_id"></select>
+            subject code: <input id="subject_number">
+            <br>
+			<span id='query_topic'>crn: </span><input id="crn_input"><input type="button" value="add class" onclick="query_classes()">			
 			<span style="margin-left:50px">color:<span>
 				<select id="color_picker2">
 					<option selected="selected" value="#00FFFF">Aqua</option>
@@ -128,10 +131,10 @@
 			</div>
 			</div>
 			<div id="ui3">
-				classes: <select id="class_select" style="width:200px; margin-top:50px; margin-left:5px;">
+		        classes: <select id="class_select" style="width:200px; margin-top:50px; margin-left:5px;">
 				</select>
 				<input value="remove" onclick="remove_class()" type="button">
-			</div>
+			    </div>
 			<div id="error_box"></div>
 			</div>
 		<canvas width="2400" height="1300" id="schedule">

@@ -1,12 +1,14 @@
 var graph_width = 1100;
 var graph_height = 560;
-var time_min = 480;
-var time_max = 1320;
+var hour_start = 8 //8am
+var hour_end = 22 //10pm
+var time_min = hour_start*60;
+var time_max = hour_end*60;
 
 $(document).ready(
 function(){
 	var canvas = document.getElementById("schedule");
-	$("#ui2").hide();
+    $("#ui2").hide();
 	$(".button").click(function(){
 		if($(this).css("background-color") == "rgb(151, 173, 166)"){
 			$(this).css("background-color","rgb(211, 224, 227)");
@@ -24,9 +26,17 @@ function(){
 	});	
 	draw_canvas();
 	get_classes();
-	canvas.onclick = function(e){click_class(e, canvas);
-	}
+	canvas.onclick = function(e){click_class(e, canvas)}
+	add_subjects();
 });
+
+function add_subjects(){
+    var subjects = ['ADM', 'ACCT', 'AE', 'AFAS', 'ANAT', 'ANIM', 'ANTH', 'ARBC', 'ARCH', 'ARTH', 'ARTS', 'BACS', 'BIO', 'BLAW', 'BMES', 'BUSN', 'CAE', 'CAEE', 'CAT', 'CFTP', 'CHE', 'CHEC', 'CHEM', 'CHIN', 'CI', 'CIE', 'CIT', 'CIVC', 'CIVE', 'CJ', 'CMGT', 'COM', 'CRTV', 'CS', 'CSDN', 'CST', 'CT', 'CULA', 'DANC', 'DIGM', 'DSMR', 'EAM', 'ECE', 'ECEC', 'ECEE', 'ECEL', 'ECEP', 'ECES', 'ECET', 'ECON', 'EDAE', 'EDAM', 'EDEX', 'EDGI', 'EDHE', 'EDLS', 'EDLT', 'EDPO', 'EDUC', 'EET', 'EGMT', 'EHRD', 'ELL', 'EMER', 'ENGL', 'ENGR', 'ENTP', 'ENVE', 'ENVS', 'ESTM', 'ET', 'EXAM', 'FASH', 'FDSC', 'FIN', 'FMST', 'FMVD', 'FREN', 'GEO', 'GER', 'GMAP', 'GSTD', 'HBRW', 'HIST', 'HNRS', 'HRM', 'HSAD', 'HSCI', 'HSM', 'HUM', 'IAS', 'INDE', 'INFO', 'INTB', 'INTR', 'IPS', 'ITAL', 'JAPN', 'JUDA', 'KOR', 'LANG', 'LING', 'MATE', 'MATH', 'MBC', 'MEM', 'MET', 'MGMT', 'MHT', 'MIP', 'MIS', 'MKTG', 'MLSC', 'MTED', 'MUSC', 'MUSL', 'MUSM', 'NFS', 'NHP', 'NURS', 'OPM', 'OPR', 'ORGB', 'PA', 'PBHL', 'PHEV', 'PHGY', 'PHIL', 'PHTO', 'PHYS', 'PLCY', 'PMGT', 'POM', 'PORT', 'PRMT', 'PROD', 'PROJ', 'PRST', 'PSCI', 'PSY', 'PTRS', 'RADI', 'REAL', 'RSCH', 'RUSS', 'SCRP', 'SCTS', 'SMT', 'SOC', 'SPAN', 'STAT', 'STS', 'SYSE', 'TAX', 'THTR', 'TVIE', 'TVMN', 'TVPR', 'UNIV', 'VSCM', 'VSST', 'WBDV', 'WEST', 'WMGD', 'WMST', 'WRIT'];
+    
+    for(var i in subjects){
+        $('#subject_id').append($('<option></option>').val(subjects[i]).html(subjects[i]));
+    }
+}
 
 function draw_canvas(){
     var canvas = document.getElementById("schedule");
