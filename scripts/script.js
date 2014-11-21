@@ -9,20 +9,84 @@ $(document).ready(
 function(){
 	var canvas = document.getElementById("schedule");
     $("#ui2").hide();
-	$(".button").click(function(){
-		if($(this).css("background-color") == "rgb(151, 173, 166)"){
-			$(this).css("background-color","rgb(211, 224, 227)");
-			if($(this).attr("id") == "button1"){
-				$("#ui1").show();
-				$("#ui2").hide();
-				$("#button2").css("background-color","rgb(151, 173, 166)");
-			}
-			else{
-				$("#ui2").show();
-				$("#ui1").hide();
-				$("#button1").css("background-color","rgb(151, 173, 166)");
-			}
-		}
+    
+    $(".day_choice")
+    .click(function(){
+        if($(this).attr('class')!='selected_day_choice'){
+            $(".selected_day_choice").removeClass('selected_day_choice');
+            $(this).addClass('selected_day_choice');
+            if($(this).attr('id') == 'same_time')
+                $("#time_div").slideDown();
+            else
+                $("#time_div").slideUp();
+        }
+    });
+
+    $("#save_schedule_image")
+    .click(function(){
+        params = { imgdata : canvas.toDataURL('image/jpeg') };
+        $.post('/save', params, function (data) { /* ... */ }) 
+     });
+     
+    $("#add_class")
+    .mousedown(function(){
+        $(this).css('background-color', 'ab38e0').css('border-color', '#aa34d9')
+    })
+    .mouseup(function(){
+        $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
+        set_schedule_item();
+    })
+    .mouseout(function(){
+        $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
+    });
+     
+    $('.color_picker')
+    .colpick({
+        layout:'hex',
+        submit:0,
+        onChange:function(hsb,hex,rgb,el,bySetColor) {
+            $(el).css('background-color','#'+hex);
+            if(!bySetColor) $(el).val(hex);
+    }})
+    .css('background-color', '#3289c7');
+	
+    $(".day")
+    .click(function(){
+        if(!$(this).attr('checked')){
+            $(this).css('background-color', '#EBB7ED').attr('checked', 'checked');
+        }
+        else{
+            $(this).css('background-color', 'white').removeAttr('checked');
+        }
+    });
+    
+    $(".button")
+    .mouseover(function(){
+        if(!$(this).attr('selected')){
+            $(this).css('background-color', "#EBABDE");   
+    }})
+    .mouseout(function(){
+        if(!$(this).attr('selected')){
+            $(this).css('background-color', "#F089DB");   
+    }});
+                
+    $(".button").click(function(){
+		if(!$(this).attr('selected')){
+		    $("[class=button][selected]")
+            .css("background-color", "#F089DB")
+            .removeAttr("selected");
+            $(this)
+            .css("background-color","#B363B8")
+            .attr('selected', 'selected');
+            if($(this).attr('id') == 'button1'){
+                $("#ui1").show();
+                $("#ui2").hide();
+            }
+            else{
+                $("#ui2").show();
+                $("#ui1").hide();
+            }
+        }
 	});	
 	draw_canvas();
 	get_classes();
@@ -31,7 +95,7 @@ function(){
 });
 
 function add_subjects(){
-    var subjects = ['ADM', 'ACCT', 'AE', 'AFAS', 'ANAT', 'ANIM', 'ANTH', 'ARBC', 'ARCH', 'ARTH', 'ARTS', 'BACS', 'BIO', 'BLAW', 'BMES', 'BUSN', 'CAE', 'CAEE', 'CAT', 'CFTP', 'CHE', 'CHEC', 'CHEM', 'CHIN', 'CI', 'CIE', 'CIT', 'CIVC', 'CIVE', 'CJ', 'CMGT', 'COM', 'CRTV', 'CS', 'CSDN', 'CST', 'CT', 'CULA', 'DANC', 'DIGM', 'DSMR', 'EAM', 'ECE', 'ECEC', 'ECEE', 'ECEL', 'ECEP', 'ECES', 'ECET', 'ECON', 'EDAE', 'EDAM', 'EDEX', 'EDGI', 'EDHE', 'EDLS', 'EDLT', 'EDPO', 'EDUC', 'EET', 'EGMT', 'EHRD', 'ELL', 'EMER', 'ENGL', 'ENGR', 'ENTP', 'ENVE', 'ENVS', 'ESTM', 'ET', 'EXAM', 'FASH', 'FDSC', 'FIN', 'FMST', 'FMVD', 'FREN', 'GEO', 'GER', 'GMAP', 'GSTD', 'HBRW', 'HIST', 'HNRS', 'HRM', 'HSAD', 'HSCI', 'HSM', 'HUM', 'IAS', 'INDE', 'INFO', 'INTB', 'INTR', 'IPS', 'ITAL', 'JAPN', 'JUDA', 'KOR', 'LANG', 'LING', 'MATE', 'MATH', 'MBC', 'MEM', 'MET', 'MGMT', 'MHT', 'MIP', 'MIS', 'MKTG', 'MLSC', 'MTED', 'MUSC', 'MUSL', 'MUSM', 'NFS', 'NHP', 'NURS', 'OPM', 'OPR', 'ORGB', 'PA', 'PBHL', 'PHEV', 'PHGY', 'PHIL', 'PHTO', 'PHYS', 'PLCY', 'PMGT', 'POM', 'PORT', 'PRMT', 'PROD', 'PROJ', 'PRST', 'PSCI', 'PSY', 'PTRS', 'RADI', 'REAL', 'RSCH', 'RUSS', 'SCRP', 'SCTS', 'SMT', 'SOC', 'SPAN', 'STAT', 'STS', 'SYSE', 'TAX', 'THTR', 'TVIE', 'TVMN', 'TVPR', 'UNIV', 'VSCM', 'VSST', 'WBDV', 'WEST', 'WMGD', 'WMST', 'WRIT'];
+    var subjects = ['select', 'ADM', 'ACCT', 'AE', 'AFAS', 'ANAT', 'ANIM', 'ANTH', 'ARBC', 'ARCH', 'ARTH', 'ARTS', 'BACS', 'BIO', 'BLAW', 'BMES', 'BUSN', 'CAE', 'CAEE', 'CAT', 'CFTP', 'CHE', 'CHEC', 'CHEM', 'CHIN', 'CI', 'CIE', 'CIT', 'CIVC', 'CIVE', 'CJ', 'CMGT', 'COM', 'CRTV', 'CS', 'CSDN', 'CST', 'CT', 'CULA', 'DANC', 'DIGM', 'DSMR', 'EAM', 'ECE', 'ECEC', 'ECEE', 'ECEL', 'ECEP', 'ECES', 'ECET', 'ECON', 'EDAE', 'EDAM', 'EDEX', 'EDGI', 'EDHE', 'EDLS', 'EDLT', 'EDPO', 'EDUC', 'EET', 'EGMT', 'EHRD', 'ELL', 'EMER', 'ENGL', 'ENGR', 'ENTP', 'ENVE', 'ENVS', 'ESTM', 'ET', 'EXAM', 'FASH', 'FDSC', 'FIN', 'FMST', 'FMVD', 'FREN', 'GEO', 'GER', 'GMAP', 'GSTD', 'HBRW', 'HIST', 'HNRS', 'HRM', 'HSAD', 'HSCI', 'HSM', 'HUM', 'IAS', 'INDE', 'INFO', 'INTB', 'INTR', 'IPS', 'ITAL', 'JAPN', 'JUDA', 'KOR', 'LANG', 'LING', 'MATE', 'MATH', 'MBC', 'MEM', 'MET', 'MGMT', 'MHT', 'MIP', 'MIS', 'MKTG', 'MLSC', 'MTED', 'MUSC', 'MUSL', 'MUSM', 'NFS', 'NHP', 'NURS', 'OPM', 'OPR', 'ORGB', 'PA', 'PBHL', 'PHEV', 'PHGY', 'PHIL', 'PHTO', 'PHYS', 'PLCY', 'PMGT', 'POM', 'PORT', 'PRMT', 'PROD', 'PROJ', 'PRST', 'PSCI', 'PSY', 'PTRS', 'RADI', 'REAL', 'RSCH', 'RUSS', 'SCRP', 'SCTS', 'SMT', 'SOC', 'SPAN', 'STAT', 'STS', 'SYSE', 'TAX', 'THTR', 'TVIE', 'TVMN', 'TVPR', 'UNIV', 'VSCM', 'VSST', 'WBDV', 'WEST', 'WMGD', 'WMST', 'WRIT'];
     
     for(var i in subjects){
         $('#subject_id').append($('<option></option>').val(subjects[i]).html(subjects[i]));
