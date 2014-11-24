@@ -1,25 +1,27 @@
-var graph_width = 1100;
-var graph_height = 560;
-var hour_start = 8 //8am
-var hour_end = 22 //10pm
-var time_min = hour_start*60;
-var time_max = hour_end*60;
+var graphWidth = 1100;
+var graphHeight = 560;
+var hourStart = 8 //8am
+var hourEnd = 22 //10pm
+var timeMin = hourStart*60;
+var timeMax = hourEnd*60;
 
 $(document).ready(
 function(){
-	var canvas = document.getElementById("schedule");
+    var canvas = document.getElementById("schedule");
     $("#ui2").hide();
-    
+    $(".time_entry").hide(); 
     $(".day_choice")
     .click(function(){
-        if($(this).attr('class')!='selected_day_choice'){
+        if(!$(this).hasClass('selected_day_choice')){
             $(".selected_day_choice").removeClass('selected_day_choice');
             $(this).addClass('selected_day_choice');
-            if($(this).attr('id') == 'same_time')
-                $("#time_div").slideDown();
-            else
-                $("#time_div").slideUp();
-        }
+            if($(this).attr('id') == 'same_time'){
+                $("#time_div").stop().slideDown();
+		$(".time_entry").stop().slideUp();
+	    }else{
+                $("#time_div").stop().slideUp();
+	    }
+	}
     });
 
     $("#save_schedule_image")
@@ -34,7 +36,7 @@ function(){
     })
     .mouseup(function(){
         $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
-        set_schedule_item();
+        setScheduleItem();
     })
     .mouseout(function(){
         $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
@@ -52,14 +54,36 @@ function(){
 	
     $(".day")
     .click(function(){
-        if(!$(this).attr('checked')){
-            $(this).css('background-color', '#EBB7ED').attr('checked', 'checked');
-        }
-        else{
-            $(this).css('background-color', 'white').removeAttr('checked');
-        }
+	var timeEntry = $(this).find(".time_entry")
+	if($("#different_times").hasClass('selected_day_choice') && timeEntry.css('display') == 'none'){
+	    $(this).addClass('selected_day');
+	    $(this).addClass('open_time_entry');
+	    timeEntry.slideDown();
+	}
+        else if($("#same_time").hasClass('selected_day_choice') && $(this).hasClass("selected_day")){
+	    $(this).removeClass('selected_day');
+	}
+	else{
+	    $(this).addClass('selected_day');
+	}
     });
-    
+   
+    $(".remove_day")
+    .click(function(e){
+	$(this).parent().parent().removeClass('selected_day');
+	$(this).parent().parent().removeClass('open_time_entry');
+	$(this).parent().slideUp();
+	e.stopPropagation();
+    });
+
+    $(document)
+    .mouseup(function(e){
+	if($(e.target).attr('class') != 'time_entry' && $(e.target).parent().attr('class') != 'time_entry'){
+	    $(".time_entry").slideUp().parent().removeClass('open_time_entry');
+	}
+    });
+   
+
     $(".button")
     .mouseover(function(){
         if(!$(this).attr('selected')){
@@ -88,13 +112,13 @@ function(){
             }
         }
 	});	
-	draw_canvas();
-	get_classes();
-	canvas.onclick = function(e){click_class(e, canvas)}
-	add_subjects();
+	drawCanvas();
+	getClasses();
+	canvas.onclick = function(e){clickClass(e, canvas)}
+	addSubjects();
 });
 
-function add_subjects(){
+function addSubjects(){
     var subjects = ['select', 'ADM', 'ACCT', 'AE', 'AFAS', 'ANAT', 'ANIM', 'ANTH', 'ARBC', 'ARCH', 'ARTH', 'ARTS', 'BACS', 'BIO', 'BLAW', 'BMES', 'BUSN', 'CAE', 'CAEE', 'CAT', 'CFTP', 'CHE', 'CHEC', 'CHEM', 'CHIN', 'CI', 'CIE', 'CIT', 'CIVC', 'CIVE', 'CJ', 'CMGT', 'COM', 'CRTV', 'CS', 'CSDN', 'CST', 'CT', 'CULA', 'DANC', 'DIGM', 'DSMR', 'EAM', 'ECE', 'ECEC', 'ECEE', 'ECEL', 'ECEP', 'ECES', 'ECET', 'ECON', 'EDAE', 'EDAM', 'EDEX', 'EDGI', 'EDHE', 'EDLS', 'EDLT', 'EDPO', 'EDUC', 'EET', 'EGMT', 'EHRD', 'ELL', 'EMER', 'ENGL', 'ENGR', 'ENTP', 'ENVE', 'ENVS', 'ESTM', 'ET', 'EXAM', 'FASH', 'FDSC', 'FIN', 'FMST', 'FMVD', 'FREN', 'GEO', 'GER', 'GMAP', 'GSTD', 'HBRW', 'HIST', 'HNRS', 'HRM', 'HSAD', 'HSCI', 'HSM', 'HUM', 'IAS', 'INDE', 'INFO', 'INTB', 'INTR', 'IPS', 'ITAL', 'JAPN', 'JUDA', 'KOR', 'LANG', 'LING', 'MATE', 'MATH', 'MBC', 'MEM', 'MET', 'MGMT', 'MHT', 'MIP', 'MIS', 'MKTG', 'MLSC', 'MTED', 'MUSC', 'MUSL', 'MUSM', 'NFS', 'NHP', 'NURS', 'OPM', 'OPR', 'ORGB', 'PA', 'PBHL', 'PHEV', 'PHGY', 'PHIL', 'PHTO', 'PHYS', 'PLCY', 'PMGT', 'POM', 'PORT', 'PRMT', 'PROD', 'PROJ', 'PRST', 'PSCI', 'PSY', 'PTRS', 'RADI', 'REAL', 'RSCH', 'RUSS', 'SCRP', 'SCTS', 'SMT', 'SOC', 'SPAN', 'STAT', 'STS', 'SYSE', 'TAX', 'THTR', 'TVIE', 'TVMN', 'TVPR', 'UNIV', 'VSCM', 'VSST', 'WBDV', 'WEST', 'WMGD', 'WMST', 'WRIT'];
     
     for(var i in subjects){
@@ -102,87 +126,87 @@ function add_subjects(){
     }
 }
 
-function draw_canvas(){
+function drawCanvas(){
     var canvas = document.getElementById("schedule");
     var context = canvas.getContext("2d");
-    var days_of_week = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    var daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
     var times = ["8:00am", "9:00am", "10:00am", "11:00am", "12:00pm", "1:00pm", "2:00pm", "3:00pm", "4:00pm", "5:00pm", "6:00pm", "7:00pm", "8:00pm", "9:00pm", "10:00pm"]
 
     for(var i = 0; i < 7; i++){
         context.beginPath();
         context.lineWidth="4";
         context.strokeStyle="black";
-        context.rect(95*2 + (i*(graph_width/7)*2), 45*2, graph_width/7*2, graph_height*2);
+        context.rect(95*2 + (i*(graphWidth/7)*2), 45*2, graphWidth/7*2, graphHeight*2);
         context.stroke();
     }
 
-    for(var i in days_of_week){
+    for(var i in daysOfWeek){
         context.fillStyle = "black";
         context.font = "40px Arial";
         context.textAlign = 'left';
-        context.fillText(days_of_week[i], 130*2+(i*(graph_width/7))*2, 35*2)
+        context.fillText(daysOfWeek[i], 130*2+(i*(graphWidth/7))*2, 35*2)
     }
 	
 	for(var i in times){
 	    context.fillStyle = "black";
-		context.font = "30px Arial";
-		context.textAlign = 'left';
-        context.fillText(times[i], 0, 100 + (600*2)/times.length*i)
+	    context.font = "30px Arial";
+	    context.textAlign = 'left';
+	    context.fillText(times[i], 0, 100 + (600*2)/times.length*i)
 	}
 }
 
-function clear_canvas(){
+function clearCanvas(){
     var canvas = document.getElementById("schedule");
     var context = canvas.getContext("2d");
     context.fillStyle = "white";
     context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function draw_classes(){
+function drawClasses(){
     var canvas = document.getElementById("schedule");
     var context = canvas.getContext("2d");
-    var uni_class;
+    var uniClass;
     var height;
-    clear_canvas();
+    clearCanvas();
 
     for(i in localStorage){
-        var text_width;
-        var text_height;
+        var textWidth;
+        var textHeight;
         var text;
         var time;
 
-        uni_class = JSON.parse(localStorage[i]);
-        for(j in uni_class.days_of_week){
-            context.fillStyle = uni_class.color;
-            x = 95*2 + (parseInt(uni_class.days_of_week[j])*(graph_width/7)*2);
-            y = 45*2 + (((uni_class.start-time_min)/(time_max-time_min))*graph_height*2);
-            width = graph_width/7*2;
-            height = (((uni_class.end - uni_class.start)/(time_max-time_min))*graph_height*2);
+        uniClass = JSON.parse(localStorage[i]);
+        for(j in uniClass.daysOfWeek){
+            context.fillStyle = uniClass.color;
+            x = 95*2 + (parseInt(uniClass.daysOfWeek[j])*(graphWidth/7)*2);
+            y = 45*2 + (((uniClass.start - timeMin)/(timeMax - timeMin))*graphHeight*2);
+            width = graphWidth/7*2;
+            height = (((uniClass.end - uniClass.start)/(timeMax - timeMin))*graphHeight*2);
             context.fillRect(x + 2,y + 2, width - 4, height + 2);
             context.fillStyle = "black";
 		    context.font = "25px Arial";
 		    context.textAlign = 'center';
-		    text = uni_class.name;
-            text_width = context.measureText(text).width;
-            while(text_width > 275){
+		    text = uniClass.name;
+            textWidth = context.measureText(text).width;
+            while(textWidth > 275){
                 text = text.slice(0,text.length-1);
-                text_width = context.measureText(text).width;
-                if(text_width <= 275){
+                textWidth = context.measureText(text).width;
+                if(textWidth <= 275){
                     text = text.concat("...")
                 }
             }
             context.fillText(text, x + (width/2), y+22+(height/4));
 
             if(height >= 75){
-                time = uni_class.start_time+"-"+uni_class.end_time;
+                time = uniClass.startTime+"-"+uniClass.endTime;
                 context.fillText(time, x + (width/2), y+30+(height/2));
             }
         }
     }
-    draw_canvas();
+    drawCanvas();
 }
 
-function click_class(e, canvas){
+function clickClass(e, canvas){
     var x;
     var y;
     var width;
@@ -197,42 +221,42 @@ function click_class(e, canvas){
     mouse_y = (e.clientY - rect.top)*2;
 
     for(i in localStorage){
-        uni_class = JSON.parse(localStorage[i]);
-        for(j in uni_class.days_of_week){
-            x = 95*2 + (parseInt(uni_class.days_of_week[j])*(graph_width/7)*2) + 2;
-            y = 45*2 + (((uni_class.start-time_min)/(time_max-time_min))*graph_height*2) + 2;
-            width = graph_width/7*2 - 4;
-            height = (((uni_class.end - uni_class.start)/(time_max-time_min))*graph_height*2) + 2;
+        uniClass = JSON.parse(localStorage[i]);
+        for(j in uniClass.daysOfWeek){
+            x = 95*2 + (parseInt(uniClass.daysOfWeek[j])*(graphWidth/7)*2) + 2;
+            y = 45*2 + (((uniClass.start - timeMin)/(timeMax - timeMin))*graphHeight*2) + 2;
+            width = graphWidth/7*2 - 4;
+            height = (((uniClass.end - uniClass.start)/(timeMax - timeMin))*graphHeight*2) + 2;
             max_x = x + width;
             max_y = y + height;
 
             if(mouse_x >= x && mouse_x <= max_x && mouse_y >= y && mouse_y >= y && mouse_y <= max_y){
-                alert(uni_class.name + "\n" + uni_class.crn);
+                alert(uniClass.name + "\n" + uniClass.crn);
                 break;
             }
         }
     }
 }
 
-function query_classes(){
+function queryClasses(){
 	if($("#query_select").text() == "CRN"){
 		var crn = $("#crn_input").val();
 		$.ajax({url:"/",
 			type:'GET',
 			data: {'id':crn}, 
 			success: function(data){
-					var class_dict = JSON.parse(data);
-					var new_class = new univ_class();		
-					var days = class_dict["days"];
-					var days_of_class = [];
-					var times = class_dict["time"];		
+					var classDict = JSON.parse(data);
+					var newClass = new UnivClass();		
+					var days = classDict["days"];
+					var daysOfClass = [];
+					var times = classDict["time"];		
 					var week = ['M','T','W','R','F','S'];
 					for(var i in week){				
 						if(days.search(week[i]) != -1){
-							days_of_class.push(i);
+							daysOfClass.push(i);
 						}
 					}
-					new_class.days_of_week = days_of_class;
+					newClass.daysOfWeek = daysOfClass;
 					times = times.split("-");
 					for(var i in times){
 						times[i] = times[i].replace(" ","");
@@ -241,22 +265,22 @@ function query_classes(){
 							times[i] = times[i].substring(1);			
 						}		
 					}
-					new_class.start_time = times[0];
-					new_class.start = timestring_to_time(times[0]);
-					new_class.end_time = times[1];
-					new_class.end = timestring_to_time(times[1]);
-					new_class.color = $("#color_picker2").val();
-					new_class.name = class_dict["subj_code"].concat(" ");
-					new_class.name = new_class.name.concat(class_dict["course_no"]);
-					new_class.name = new_class.name.concat(" - ");
-					new_class.name = new_class.name.concat(class_dict["sec"]);
-					new_class.crn = class_dict["CRN"];
-					console.log(new_class.crn);
-					if(error_check(new_class)){
-						localStorage[new_class.name] = JSON.stringify(new_class);
-						$("#class_select").append( $('<option></option>').val(new_class.name).html(new_class.name + " - " + new_class.crn));
-						draw_classes();
-						reset_form();
+					newClass.startTime = times[0];
+					newClass.start = timestringToTime(times[0]);
+					newClass.endTime = times[1];
+					newClass.end = timestringToTime(times[1]);
+					newClass.color = $("#color_picker2").val();
+					newClass.name = class_dict["subj_code"].concat(" ");
+					newClass.name = newClass.name.concat(classDict["course_no"]);
+					newClass.name = newClass.name.concat(" - ");
+					newClass.name = newClass.name.concat(classDict["sec"]);
+					newClass.crn = classDict["CRN"];
+					console.log(newClass.crn);
+					if(errorCheck(newClass)){
+						localStorage[newClass.name] = JSON.stringify(newClass);
+						$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+						drawClasses();
+						resetForm();
 					}
 		}});
 	}
@@ -272,63 +296,63 @@ function query_classes(){
 	}
 }
 
-function set_schedule_item()
+function setScheduleItem()
 {
-	var new_class = new univ_class();
-	new_class.name = $("#class_name").val();
-	new_class.start = timestring_to_time($("#time_start option:selected").text());
-	new_class.start_time = $("#time_start option:selected").text();
-	new_class.end = timestring_to_time($("#time_end option:selected").text());
-	new_class.end_time = $("#time_end option:selected").text();
-	new_class.color = $("#color_picker").val();
-	new_class.days_of_week = $('input:checkbox:checked.day').map(function () {
+	var newClass = new UnivClass();
+	newClass.name = $("#class_name").val();
+	newClass.start = timestringToTime($("#time_start option:selected").text());
+	newClass.startTime = $("#time_start option:selected").text();
+	newClass.end = timestringToTime($("#time_end option:selected").text());
+	newClass.endTime = $("#time_end option:selected").text();
+	newClass.color = $("#color_picker").val();
+	newClass.daysOfWeek = $('input:checkbox:checked.day').map(function () {
 		return this.value;
 }).get();
-	new_class.crn = $("#crn").val();	
-	if(error_check(new_class)){
-		localStorage[new_class.name] = JSON.stringify(new_class);
-		$("#class_select").append( $('<option></option>').val(new_class.name).html(new_class.name + " - " + new_class.crn));
-		draw_classes();
-		reset_form();
+	newClass.crn = $("#crn").val();	
+	if(errorCheck(newClass)){
+		localStorage[newClass.name] = JSON.stringify(newClass);
+		$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+		drawClasses();
+		resetForm();
 	}
 }
 
-function remove_class(){
-    var deleted_item = $("#class_select").val();
+function removeClass(){
+    var deletedItem = $("#class_select").val();
 	localStorage.removeItem(deleted_item);
 	$("#class_select option:selected").remove()
-	draw_classes();
+	drawClasses();
 }
 
-function error_check(new_class){
-	var error_box = $("#error_box");
-	var class_match = class_overlap(new_class);
+function errorCheck(newClass){
+	var errorBox = $("#error_box");
+	var classMatch = classOverlap(newClass);
 	
-	if(new_class.end < new_class.start){
-		error_box.text("end time can't be before or the same as start time");
+	if(newClass.end < newClass.start){
+		errorBox.text("end time can't be before or the same as start time");
 	}
-	else if(new_class.name === ""){
-		error_box.text("can't leave class name blank");
+	else if(newClass.name === ""){
+		errorBox.text("can't leave class name blank");
 	}
-	else if(new_class.days_of_week.length === 0){
-		error_box.text("you must select at least one day of the week");
+	else if(newClass.days_of_week.length === 0){
+		errorBox.text("you must select at least one day of the week");
 	}
-	else if(same_class_name(new_class)){
-		error_box.text("can't have a class with the same name");
+	else if(sameClass_name(new_class)){
+		errorBox.text("can't have a class with the same name");
 	}
-	else if(class_match != false){
-		error_box.text("overlaps with class: " + class_match);
+	else if(classMatch != false){
+		errorBox.text("overlaps with class: " + classMatch);
 	}
 	else{
-		error_box.text("");
+		errorBox.text("");
 		return true;
 	}
 	return false;
 }
 
-function same_class_name(new_class){
+function sameClassName(newClass){
 	for(i in localStorage){
-		if(JSON.parse(localStorage[i]).name === new_class.name)
+		if(JSON.parse(localStorage[i]).name === newClass.name)
 		{
 			return true;
 		}
@@ -336,34 +360,34 @@ function same_class_name(new_class){
 	return false;
 }
 
-function class_overlap(new_class){
-	var days_match = false;
-	var class_compare;
+function classOverlap(newClass){
+	var daysMatch = false;
+	var classCompare;
 	var result;
 	
 	for(i in localStorage){
-		for(n in JSON.parse(localStorage[i]).days_of_week){
-			result = new_class.days_of_week.indexOf(JSON.parse(localStorage[i]).days_of_week[n]);
+		for(n in JSON.parse(localStorage[i]).daysOfWeek){
+			result = newClass.daysOfWeek.indexOf(JSON.parse(localStorage[i]).daysOfWeek[n]);
 			if(result !== -1){
-				days_match = true;
-				class_compare = JSON.parse(localStorage[i]);
+				daysMatch = true;
+				classCompare = JSON.parse(localStorage[i]);
 				break;
 			}
 		}
-		if(days_match){
-			if(class_compare.start >=  new_class.end ||  class_compare.end <=  new_class.start)
+		if(daysMatch){
+			if(classCompare.start >=  newClass.end ||  classCompare.end <=  newClass.start)
 			{
-				days_match = false;
+				daysMatch = false;
 			}
 			else{
-				return class_compare.name;
+				return classCompare.name;
 			}
 		}
 	}
 	return false;
 }
 
-function reset_form(){
+function resetForm(){
 	$(".day").attr("checked", false);
 	$("#class_name").val("");
 	$("#time_start").val("0");
@@ -372,46 +396,46 @@ function reset_form(){
 	$("#crn").val("");
 }
 
-function get_classes(){
+function getClasses(){
 	if(localStorage != null){
 		for(key in localStorage){
 			$("#class_select").append( $('<option></option>').val(JSON.parse(localStorage[key]).name).html(JSON.parse(localStorage[key]).name +" - " + JSON.parse(localStorage[key]).crn));
 		}
-	    draw_classes();
+	    drawClasses();
 	}
 }
 
-function univ_class(){
-	this.days_of_week;
+function UnivClass(){
+	this.daysOfWeek;
 	this.name;
 	this.start;
-	this.start_time;
+	this.startTime;
 	this.end;
-	this.end_time;
+	this.endTime;
 	this.color;
 	this.crn;
 }
 
-function timestring_to_time(timestring){
+function timestringToTime(timeString){
     var hour;
     var min;
     var am_pm = timestring.slice(timestring.length - 2,timestring.length);
     timestring = timestring.slice(0,timestring.length-2);
-    time_split = timestring.split(":");
+    timeSplit = timestring.split(":");
 
 
     if(am_pm == "pm"){
-        if(parseInt(time_split[0]) === 12){
+        if(parseInt(timeSplit[0]) === 12){
             hour = 12;
         }
         else{
-            hour = parseInt(time_split[0]) + 12;
+            hour = parseInt(timeSplit[0]) + 12;
         }
     }
     else{
-        hour = parseInt(time_split[0]);
+        hour = parseInt(timeSplit[0]);
     }
-    min = parseInt(time_split[1]);
+    min = parseInt(timeSplit[1]);
 
     return hour*60+min;
 }

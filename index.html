@@ -1,93 +1,210 @@
-<html><head>
-<meta http-equiv="content-type" content="text/html; charset=windows-1252">
-		<title>schedule-meister</title>
-		<link href="stylesheets/style.css" rel="stylesheet" type="text/css">
-		<script src="scripts/jquery-2.1.1.min.js"></script>
-		<script src="scripts/colpick.js" type="text/javascript"></script>
+<html>
+    <head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+	<title>schedule-meister</title>
+	<link href="stylesheets/style.css" rel="stylesheet" type="text/css">
+	<script src="scripts/jquery-2.1.1.min.js"></script>
+	<script src="scripts/colpick.js" type="text/javascript"></script>
         <link href="stylesheets/colpick.css" rel="stylesheet"  type="text/css"/>
         <script src="scripts/script.js" type="text/javascript" ></script>
 	</head>
 	<body>
 	    <div id="navbar">
-		    <div id="buttonwrapper">
-		        <div id="button1" class="button" selected="selected">create class</div>
-		        <div id="button2" class="button">find class</div>
-            </div>
-        </div>
-        <div id=uiwrapper>
+		<div id="buttonwrapper">
+		    <div id="button1" class="button" selected="selected">create class</div>
+		    <div id="button2" class="button">find class</div>
+		</div>
+	    </div>
+	    <div id=uiwrapper>
 		<div id="ui">
-			<div id="ui1" class="uiclass">
-				<span id="class_name_span">class name</span> <input id="class_name" maxlength="50">
+		    <div id="ui1" class="uiclass">
+			<span id="class_name_span">class name</span> 
+			<input id="class_name" maxlength="50">
+			<br>
+			<span id="crn_span">crn</span><input id="crn">
+			<br>
+			<div id='day_choice_wrapper'>this class meets
+			    <div class='day_choice selected_day_choice' id='same_time'>at the same time</div>
+			    <div class='day_choice' id='different_times'>at different times </div>
+			</div>
+			<div id='M' class="day" style='margin-left:0px'>monday
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:10px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
 				<br>
-				<span id="crn_span">crn</span><input id="crn">
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px; margin-bottom:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='T' class="day">tuesday
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:20px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
 				<br>
-				<div id='day_choice_wrapper'>this class meets
-                    <div class='day_choice selected_day_choice' id='same_time'>at the same time</div>
-                    <div class='day_choice' id='different_times'>at different times </div>
-                </div>
-                <div class="day" style='margin-left:0px'>monday</div>
-				<div class="day">tuesday</div>
-				<div class="day">wednesday</div>
-				<div class="day">thursday</div>
-				<div class="day">friday</div>
-				<div class="day">saturday</div>
-				<div class="day">sunday</div>
-				<div id='time_div'>start time 
-                    <input id='startTime'>
-				    <select id="time_start">
-					    <option>am</option>
-					    <option>pm</option>
-				    </select>
-				    ends
-                    <input id='endTime'>
-				    <select id="time_end">
-					    <option>am</option>
-					    <option>pm</option>
-				    </select>
-				</div>
-                <br>
-				<div id='color'>color <div class="color_picker"></div></div>
-				<div id='add_class'>add class</div>
-            </div>
-			<div id="ui2" class="uiclass">
-			query by: <select id="query_select">
-				<option>CRN</option>
-				<option>SUBJECT</option>		
-				<option>NAME</option>
-			</select><br>
-            subject: 
-            <select id="subject_id"></select>
-            subject code: <input id="subject_number">
-            <br>
-			<span id='query_topic'>crn: </span><input id="crn_input"><input type="button" value="add class" onclick="query_classes()">			
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='W' class="day">wednesday
+			
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:20px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+				<br>
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='TR' class="day">thursday
+			
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:20px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+				<br>
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='F' class="day">friday
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:20px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+				<br>
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='S' class="day">saturday
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:20px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+				<br>
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='SU' class="day">sunday
+			    <div class="time_entry">
+				<span style='margin-left:10px; margin-right:2px'>start</span>
+				<input style='width:40px; margin-top:20px'>
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+				<br>
+				<span style='margin-left:10px; margin-right:7px'>end</span>
+				<input style='width:40px; margin-top:5px'> 
+				<select style='margin-right:10px'>
+				    <option>am</option>
+				    <option>pm</option>
+				</select>
+			    <div class='remove_day'>remove</div>
+			    </div>	
+			</div>
+			<div id='time_div'>start time     
+			    <input id='startTime'>
+			    <select id="time_start">
+				<option>am</option>
+				<option>pm</option>
+			    </select>
+			    ends
+			    <input id='endTime'>
+			    <select id="time_end">
+				<option>am</option>
+				<option>pm</option>
+			    </select>
+			</div>
+			<br>
+			<div id='color'>color <div class="color_picker"></div></div>
+			<div id='add_class'>add class</div>
+		    </div>
+		    <div id="ui2" class="uiclass">
+			query by: 
+			<select id="query_select">
+			    <option>CRN</option>
+			    <option>SUBJECT</option>		
+			    <option>NAME</option>
+			</select>
+			<br>
+			subject: 
+			<select id="subject_id"></select>
+			subject code:
+			<input id="subject_number">
+			<br>
+			<span id='query_topic'>crn: </span>
+			<input id="crn_input">
+			<input type="button" value="add class" onclick="queryClasses()">			
 			<span style="margin-left:50px">color:<span>
-				<select id="color_picker2">
-					<option selected="selected" value="#00FFFF">Aqua</option>
-					<option value="#DEB887">BurlyWood</option>
-					<option value="#7FFF00">Chartreuse</option>
-					<option value="#DC143C">Crimson</option>
-					<option value="#483D8B">DarkSlateBlue</option>
-					<option value="#9400D3">DarkViolet</option>
-					<option value="#F0E68C">Khahki</option>
-					<option value="#DDA0DD">Plum</option>
-					<option value="#FF6347">Tomato</option>
-					<option value="#FFA500">Orange</option>
-					<option value="#DCDCDC">Gainsboro</option>
-				</select>			
-			</div>
-			</div>
-			<hr style='margin-top:15px; margin-bottom:5px;border-style:dashed; border-color:#e3b8df'>
+			<select id="color_picker2">
+			</select>			
+		    </div>
+		</div>
+	    <hr style='margin-top:15px; margin-bottom:5px;border-style:dashed; border-color:#e3b8df'>
             <div id="error_box"></div>
-		    <div id="class_select_wrapper">
-		        classes <select id="class_select">
-		        </select>
-                <input value="remove" onclick="remove_class()" type="button">
+	    <div id="class_select_wrapper">
+		classes 
+		<select id="class_select"></select>
+                <input value="remove" onclick="removeClass()" type="button">
             </div>
     	    <div id='save_schedule_image'>save schedule as png</div>
         </div>
         <canvas width="2400" height="1300" id="schedule">
-		</canvas>
-		<span style="margin-top:50px">version 0.4  a better <i>better</i> webtms</span>
+	    </canvas>
+	    <span style="margin-top:50px">version 0.4  a better <i>better</i> webtms</span>
 
         <div id="loading"></div>
         <div id="load_text">loading...</div>

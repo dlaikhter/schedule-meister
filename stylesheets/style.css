@@ -11,7 +11,7 @@ padding: 0;
 #uiwrapper{
 margin:auto;
 margin-top:15px;
-width:800px;
+width:700px;
 border-style:solid;
 border-width:1px;
 border-color:#EF96FF;
@@ -67,7 +67,25 @@ border-style:solid;
 border-width:1px;
 box-shadow: 0px 0px 5px #ff7e21;
 }
+.time_entry{
+position:absolute;
+height:90px;
+width:150px;
+background-color:white;
+border-style:solid;
+border-width:3px;
+border-radius:5px;
+z-index:2;
+top:30px;
+left:-40px;
+}
+.remove_day{
+text-align:center; 
+color:blue;
+cursor:pointer;
+}
 .day{
+position:relative;
 float:left;
 margin-left:10px;
 margin-top:15px;
@@ -84,6 +102,12 @@ cursor:default;
 /* Rules below not implemented in browsers yet */
 -o-user-select: none;
 user-select: none;
+}
+.selected_day{
+background-color:#EBB7ED;
+}
+.open_time_entry{
+background-color:#f86bff;
 }
 #time_div{
 float:left;
