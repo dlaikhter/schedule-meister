@@ -8,6 +8,9 @@ var timeMax = hourEnd*60;
 $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
+    
+    $("#add_class").click(setScheduleItem());    
+
     $("#ui2").hide();
     $(".time_entry").hide(); 
     $(".day_choice")
@@ -21,8 +24,7 @@ function(){
 	    }else{
                 $("#time_div").stop().slideUp();
 	    }
-	}
-    });
+	}});
 
     $("#save_schedule_image")
     .click(function(){
@@ -58,7 +60,7 @@ function(){
 	if($("#different_times").hasClass('selected_day_choice') && timeEntry.css('display') == 'none'){
 	    $(this).addClass('selected_day');
 	    $(this).addClass('open_time_entry');
-	    timeEntry.slideDown();
+	    timeEntry.show();
 	}
         else if($("#same_time").hasClass('selected_day_choice') && $(this).hasClass("selected_day")){
 	    $(this).removeClass('selected_day');
@@ -72,16 +74,15 @@ function(){
     .click(function(e){
 	$(this).parent().parent().removeClass('selected_day');
 	$(this).parent().parent().removeClass('open_time_entry');
-	$(this).parent().slideUp();
+	$(this).parent().hide();
 	e.stopPropagation();
     });
 
     $(document)
     .mouseup(function(e){
 	if($(e.target).attr('class') != 'time_entry' && $(e.target).parent().attr('class') != 'time_entry'){
-	    $(".time_entry").slideUp().parent().removeClass('open_time_entry');
-	}
-    });
+	    $(".time_entry").hide().parent().removeClass('open_time_entry');
+	}});
    
 
     $(".button")
@@ -299,16 +300,28 @@ function queryClasses(){
 function setScheduleItem()
 {
 	var newClass = new UnivClass();
-	newClass.name = $("#class_name").val();
-	newClass.start = timestringToTime($("#time_start option:selected").text());
-	newClass.startTime = $("#time_start option:selected").text();
-	newClass.end = timestringToTime($("#time_end option:selected").text());
-	newClass.endTime = $("#time_end option:selected").text();
-	newClass.color = $("#color_picker").val();
-	newClass.daysOfWeek = $('input:checkbox:checked.day').map(function () {
-		return this.value;
-}).get();
-	newClass.crn = $("#crn").val();	
+    newClass.crn = $("#crn").val();	
+    newClass.name = $("#class_name").val();
+	newClass.color = $("#color_picker").css('background-color');
+    newClass.classTimes = []
+    if($('.selected_day_choice').attr('id') == 'different_times'){
+        $('.day').each(function(){
+            var key = $(this).attr('id');
+            newClass.classTimes[key]['start'] = $(this).children('.start').val() + $(this).children('.start_select option:selected').text();
+            newClass.classTimes[key]['startTime'] = timestringToTime(newClass.classTimes[key]['start']);
+            newClass.classTimes[key]['end'] = $(this).children('.end').val() + $(this).children('.end_select option:selected').text();
+            newClass.classTimes[key]['endTime'] = timestringToTime(newClass.classTimes[key]['end']);          
+        }); 
+    }
+    else{
+        $('.day').each(function(){
+            var key = $(this).attr('id');
+            newClass.classTimes[key]['start'] = $('#startTime').val() + $('#time_start option:selected').text();
+            newClass.classTimes[key]['startTime'] = timestringToTime(newClass.classTimes[key]['start']);
+            newClass.classTimes[key]['end'] = $('#endTime').val() + $('#time_end option:selected').text();
+            newClass.classTimes[key]['endTime'] = timestringToTime(newClass.classTimes[key]['end']);
+        });
+    }
 	if(errorCheck(newClass)){
 		localStorage[newClass.name] = JSON.stringify(newClass);
 		$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
@@ -328,16 +341,16 @@ function errorCheck(newClass){
 	var errorBox = $("#error_box");
 	var classMatch = classOverlap(newClass);
 	
-	if(newClass.end < newClass.start){
+	if(areClassTimesValid(newClass)){
 		errorBox.text("end time can't be before or the same as start time");
 	}
 	else if(newClass.name === ""){
 		errorBox.text("can't leave class name blank");
 	}
-	else if(newClass.days_of_week.length === 0){
+	else if(newClass.classTimes.length === 0){
 		errorBox.text("you must select at least one day of the week");
 	}
-	else if(sameClass_name(new_class)){
+	else if(sameClassName(newClass)){
 		errorBox.text("can't have a class with the same name");
 	}
 	else if(classMatch != false){
@@ -350,10 +363,20 @@ function errorCheck(newClass){
 	return false;
 }
 
+function areClassTimesValid(newClass){
+    var times;
+    for(var key in newClass.classTimes){
+        times = newClass[key]
+        if(times['start'] > times['end']){
+            return false;
+        }
+    }
+    return true;
+}
+
 function sameClassName(newClass){
-	for(i in localStorage){
-		if(JSON.parse(localStorage[i]).name === newClass.name)
-		{
+	for(key in localStorage){
+		if(JSON.parse(localStorage[key]).name === newClass.name){
 			return true;
 		}
 	}
@@ -406,12 +429,8 @@ function getClasses(){
 }
 
 function UnivClass(){
-	this.daysOfWeek;
+	this.classTimes;
 	this.name;
-	this.start;
-	this.startTime;
-	this.end;
-	this.endTime;
 	this.color;
 	this.crn;
 }
