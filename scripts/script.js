@@ -1,15 +1,15 @@
 var graphWidth = 1100;
 var graphHeight = 560;
-var hourStart = 8 //8am
-var hourEnd = 22 //10pm
+var hourStart = 8; //8am
+var hourEnd = 12+10; //10pm
 var timeMin = hourStart*60;
 var timeMax = hourEnd*60;
 
 $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
-    
-    $("#add_class").click(setScheduleItem());    
+     
+    $("#add_class").click(function(){setScheduleItem()});    
 
     $("#ui2").hide();
     $(".time_entry").hide(); 
@@ -112,8 +112,11 @@ function(){
                 $("#ui1").hide();
             }
         }
-	});	
-	drawCanvas();
+	});
+    clearLocalStorage();
+    //checkLocalStorage();
+    clearCanvas();	
+    drawCanvas();
 	getClasses();
 	canvas.onclick = function(e){clickClass(e, canvas)}
 	addSubjects();
@@ -168,21 +171,23 @@ function drawClasses(){
     var context = canvas.getContext("2d");
     var uniClass;
     var height;
+    classes = JSON.parse(localStorage.getItem('classes'));
     clearCanvas();
-
-    for(i in localStorage){
+    
+    for(key in classes){
         var textWidth;
         var textHeight;
         var text;
         var time;
 
-        uniClass = JSON.parse(localStorage[i]);
-        for(j in uniClass.daysOfWeek){
+        uniClass = JSON.parse(localStorage['classes']);
+        for(timeKey in uniClass.classTimes){
+            day = uniClass.classTimes[timeKey]
             context.fillStyle = uniClass.color;
-            x = 95*2 + (parseInt(uniClass.daysOfWeek[j])*(graphWidth/7)*2);
-            y = 45*2 + (((uniClass.start - timeMin)/(timeMax - timeMin))*graphHeight*2);
+            x = 95*2 + ((getDayNum(day))*(graphWidth/7)*2);
+            y = 45*2 + (((day['startTime'] - timeMin)/(timeMax - timeMin))*graphHeight*2);
             width = graphWidth/7*2;
-            height = (((uniClass.end - uniClass.start)/(timeMax - timeMin))*graphHeight*2);
+            height = (((day['endTime'] - day['startTime'])/(timeMax - timeMin))*graphHeight*2);
             context.fillRect(x + 2,y + 2, width - 4, height + 2);
             context.fillStyle = "black";
 		    context.font = "25px Arial";
@@ -216,18 +221,23 @@ function clickClass(e, canvas){
     var max_y;
     var mouse_x;
     var mouse_y;
+    var uniClass;
+    var day;
     var rect = canvas.getBoundingClientRect();
+    
+    classes = JSON.parse(localStorage['classes'])
 
     mouse_x = (e.clientX - rect.left)*2;
     mouse_y = (e.clientY - rect.top)*2;
 
-    for(i in localStorage){
-        uniClass = JSON.parse(localStorage[i]);
-        for(j in uniClass.daysOfWeek){
-            x = 95*2 + (parseInt(uniClass.daysOfWeek[j])*(graphWidth/7)*2) + 2;
-            y = 45*2 + (((uniClass.start - timeMin)/(timeMax - timeMin))*graphHeight*2) + 2;
+    for(classKey in classes){
+        uniClass = classes[ClassKey];
+        for(timeKey in uniClass.classTimes){
+            day = uniClass.classTimes[timeKey]
+            x = 95*2 + ((getDayNum(timeKey))*(graphWidth/7)*2) + 2;
+            y = 45*2 + (((day['startTime'] - timeMin)/(timeMax - timeMin))*graphHeight*2) + 2;
             width = graphWidth/7*2 - 4;
-            height = (((uniClass.end - uniClass.start)/(timeMax - timeMin))*graphHeight*2) + 2;
+            height = (((day['endTime'] - day['startTime'])/(timeMax - timeMin))*graphHeight*2) + 2;
             max_x = x + width;
             max_y = y + height;
 
@@ -237,6 +247,11 @@ function clickClass(e, canvas){
             }
         }
     }
+}
+
+function getDayNum(day){
+    numArray = ["M", "T", "W", "R", "F", "S", "SU"];
+    return numArray.indexOf(day);       
 }
 
 function queryClasses(){
@@ -267,9 +282,9 @@ function queryClasses(){
 						}		
 					}
 					newClass.startTime = times[0];
-					newClass.start = timestringToTime(times[0]);
+					newClass.start = timeStringToTime(times[0]);
 					newClass.endTime = times[1];
-					newClass.end = timestringToTime(times[1]);
+					newClass.end = timeStringToTime(times[1]);
 					newClass.color = $("#color_picker2").val();
 					newClass.name = class_dict["subj_code"].concat(" ");
 					newClass.name = newClass.name.concat(classDict["course_no"]);
@@ -278,7 +293,7 @@ function queryClasses(){
 					newClass.crn = classDict["CRN"];
 					console.log(newClass.crn);
 					if(errorCheck(newClass)){
-						localStorage[newClass.name] = JSON.stringify(newClass);
+						addClassToLS(newClass);
 						$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
 						drawClasses();
 						resetForm();
@@ -305,25 +320,27 @@ function setScheduleItem()
 	newClass.color = $("#color_picker").css('background-color');
     newClass.classTimes = []
     if($('.selected_day_choice').attr('id') == 'different_times'){
-        $('.day').each(function(){
+        $('.selected_day').each(function(){
             var key = $(this).attr('id');
+            newClass.classTimes[key] = {};
             newClass.classTimes[key]['start'] = $(this).children('.start').val() + $(this).children('.start_select option:selected').text();
-            newClass.classTimes[key]['startTime'] = timestringToTime(newClass.classTimes[key]['start']);
+            newClass.classTimes[key]['startTime'] = TimeStringToTime(newClass.classTimes[key]['start']);
             newClass.classTimes[key]['end'] = $(this).children('.end').val() + $(this).children('.end_select option:selected').text();
-            newClass.classTimes[key]['endTime'] = timestringToTime(newClass.classTimes[key]['end']);          
+            newClass.classTimes[key]['endTime'] = timeStringToTime(newClass.classTimes[key]['end']);          
         }); 
     }
     else{
-        $('.day').each(function(){
+        $('.selected_day').each(function(){
             var key = $(this).attr('id');
+            newClass.classTimes[key] = {};
             newClass.classTimes[key]['start'] = $('#startTime').val() + $('#time_start option:selected').text();
-            newClass.classTimes[key]['startTime'] = timestringToTime(newClass.classTimes[key]['start']);
+            newClass.classTimes[key]['startTime'] = timeStringToTime(newClass.classTimes[key]['start']);
             newClass.classTimes[key]['end'] = $('#endTime').val() + $('#time_end option:selected').text();
-            newClass.classTimes[key]['endTime'] = timestringToTime(newClass.classTimes[key]['end']);
+            newClass.classTimes[key]['endTime'] = timeStringToTime(newClass.classTimes[key]['end']);
         });
     }
 	if(errorCheck(newClass)){
-		localStorage[newClass.name] = JSON.stringify(newClass);
+		addClassToLS(newClass);
 		$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
 		drawClasses();
 		resetForm();
@@ -332,7 +349,7 @@ function setScheduleItem()
 
 function removeClass(){
     var deletedItem = $("#class_select").val();
-	localStorage.removeItem(deleted_item);
+	removeClassFromLS(deleted_item);
 	$("#class_select option:selected").remove()
 	drawClasses();
 }
@@ -340,15 +357,15 @@ function removeClass(){
 function errorCheck(newClass){
 	var errorBox = $("#error_box");
 	var classMatch = classOverlap(newClass);
-	
-	if(areClassTimesValid(newClass)){
+
+	if(!areClassTimesValid(newClass)){
 		errorBox.text("end time can't be before or the same as start time");
 	}
 	else if(newClass.name === ""){
 		errorBox.text("can't leave class name blank");
 	}
-	else if(newClass.classTimes.length === 0){
-		errorBox.text("you must select at least one day of the week");
+	else if(Object.keys(newClass.classTimes).length === 0){
+        errorBox.text("you must select at least one day of the week");
 	}
 	else if(sameClassName(newClass)){
 		errorBox.text("can't have a class with the same name");
@@ -366,8 +383,8 @@ function errorCheck(newClass){
 function areClassTimesValid(newClass){
     var times;
     for(var key in newClass.classTimes){
-        times = newClass[key]
-        if(times['start'] > times['end']){
+        times = newClass.classTimes[key]
+        if(times['startTime'] > times['endTime']){
             return false;
         }
     }
@@ -375,8 +392,9 @@ function areClassTimesValid(newClass){
 }
 
 function sameClassName(newClass){
-	for(key in localStorage){
-		if(JSON.parse(localStorage[key]).name === newClass.name){
+	var classes = JSON.parse(localStorage['classes']);
+    for(classKey in classes){
+		if(classes[classKey].name === newClass.name){
 			return true;
 		}
 	}
@@ -384,28 +402,20 @@ function sameClassName(newClass){
 }
 
 function classOverlap(newClass){
-	var daysMatch = false;
-	var classCompare;
-	var result;
-	
-	for(i in localStorage){
-		for(n in JSON.parse(localStorage[i]).daysOfWeek){
-			result = newClass.daysOfWeek.indexOf(JSON.parse(localStorage[i]).daysOfWeek[n]);
-			if(result !== -1){
-				daysMatch = true;
-				classCompare = JSON.parse(localStorage[i]);
-				break;
-			}
-		}
-		if(daysMatch){
-			if(classCompare.start >=  newClass.end ||  classCompare.end <=  newClass.start)
-			{
-				daysMatch = false;
-			}
-			else{
-				return classCompare.name;
-			}
-		}
+	var compareClass;
+    var classes = JSON.parse(localStorage['classes']);
+    
+    for(classKey in classes){
+        compareClass = classes[classKey]; 
+        for(day in compareClass.classTimes){
+		    if(day in newClass.classTimes){
+			    newClassTimes = newClass.classTimes[day]
+                compareClassTimes = compareClass.classTimes[day]
+                if(!(compareClass.start >=  newClass.end ||  classCompare.end <=  newClass.start)){
+				    return classCompare.name;
+                }
+            }
+        }
 	}
 	return false;
 }
@@ -420,12 +430,46 @@ function resetForm(){
 }
 
 function getClasses(){
-	if(localStorage != null){
-		for(key in localStorage){
-			$("#class_select").append( $('<option></option>').val(JSON.parse(localStorage[key]).name).html(JSON.parse(localStorage[key]).name +" - " + JSON.parse(localStorage[key]).crn));
-		}
-	    drawClasses();
-	}
+	try{
+        var classes = JSON.parse(localStorage['classes']);
+	    for(key in classes){
+		    try{
+                if(classes[key].version !== "0.4") throw "outdated UnivClass object";
+                $("#class_select").append( $('<option></option>').val(classes[key].name).html(classes[key].name +" - " + JSON.parse(localStorage[key]).crn));
+                drawClasses();
+            }
+            catch(err){
+                console.log(err.message);
+                clearLocalStorage();
+            }
+        }
+    }
+    catch(err){
+        console.log(err.message);
+        localStorage.removeItem("classes");
+    }
+}
+
+function addClassToLS(newClass){
+    classes = JSON.parse(localStorage["classes"]);
+    classes[newClass.name] = newClass;
+    localStorage.setItem("classes", JSON.stringify(classes));
+}
+
+function removeClassFromLS(key){
+    classes = JSON.parse(localStorage["classes"]);
+    delete classes[key];
+    localStorage.setItem("classes", JSON.stringify(classes));
+}
+
+function checkLocalStorage(){
+    if(localStorage.getItem("classes") === null){
+        localStorage.setItem("classes", JSON.stringify({}));
+    }
+}
+
+function clearLocalStorage(){
+   localStorage.setItem("classes", JSON.stringify({}));
 }
 
 function UnivClass(){
@@ -433,15 +477,15 @@ function UnivClass(){
 	this.name;
 	this.color;
 	this.crn;
+    this.version = "0.4";
 }
 
-function timestringToTime(timeString){
+function timeStringToTime(timeString){
     var hour;
     var min;
-    var am_pm = timestring.slice(timestring.length - 2,timestring.length);
-    timestring = timestring.slice(0,timestring.length-2);
-    timeSplit = timestring.split(":");
-
+    var am_pm = timeString.slice(timeString.length - 2,timeString.length);
+    timeString = timeString.slice(0,timeString.length-2);
+    timeSplit = timeString.split(":");
 
     if(am_pm == "pm"){
         if(parseInt(timeSplit[0]) === 12){
