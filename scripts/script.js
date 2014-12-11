@@ -9,8 +9,6 @@ $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
      
-    $("#add_class").click(function(){setScheduleItem()});    
-
     $("#ui2").hide();
     $(".time_entry").hide(); 
     $(".day_choice")
@@ -24,13 +22,13 @@ function(){
 	    }else{
                 $("#time_div").stop().slideUp();
 	    }
-	}});
+    }});
 
     $("#save_schedule_image")
     .click(function(){
         params = { imgdata : canvas.toDataURL('image/jpeg') };
         $.post('/save', params, function (data) { /* ... */ }) 
-     });
+    });
      
     $("#add_class")
     .mousedown(function(){
@@ -82,7 +80,7 @@ function(){
     .mouseup(function(e){
 	if($(e.target).attr('class') != 'time_entry' && $(e.target).parent().attr('class') != 'time_entry'){
 	    $(".time_entry").hide().parent().removeClass('open_time_entry');
-	}});
+    }});
    
 
     $(".button")
@@ -96,8 +94,8 @@ function(){
     }});
                 
     $(".button").click(function(){
-		if(!$(this).attr('selected')){
-		    $("[class=button][selected]")
+	if(!$(this).attr('selected')){
+	    $("[class=button][selected]")
             .css("background-color", "#F089DB")
             .removeAttr("selected");
             $(this)
@@ -112,14 +110,13 @@ function(){
                 $("#ui1").hide();
             }
         }
-	});
-    clearLocalStorage();
-    //checkLocalStorage();
+    });
+    checkLocalStorage();
     clearCanvas();	
     drawCanvas();
-	getClasses();
-	canvas.onclick = function(e){clickClass(e, canvas)}
-	addSubjects();
+    getClasses();
+    canvas.onclick = function(e){clickClass(e, canvas)}
+    addSubjects();
 });
 
 function addSubjects(){
@@ -151,12 +148,12 @@ function drawCanvas(){
         context.fillText(daysOfWeek[i], 130*2+(i*(graphWidth/7))*2, 35*2)
     }
 	
-	for(var i in times){
-	    context.fillStyle = "black";
-	    context.font = "30px Arial";
-	    context.textAlign = 'left';
-	    context.fillText(times[i], 0, 100 + (600*2)/times.length*i)
-	}
+    for(var i in times){
+	context.fillStyle = "black";
+	context.font = "30px Arial";
+        context.textAlign = 'left';
+        context.fillText(times[i], 0, 100 + (600*2)/times.length*i)
+    }
 }
 
 function clearCanvas(){
@@ -180,19 +177,19 @@ function drawClasses(){
         var text;
         var time;
 
-        uniClass = JSON.parse(localStorage['classes']);
-        for(timeKey in uniClass.classTimes){
+        uniClass = classes[key];
+	for(timeKey in uniClass.classTimes){
             day = uniClass.classTimes[timeKey]
             context.fillStyle = uniClass.color;
-            x = 95*2 + ((getDayNum(day))*(graphWidth/7)*2);
+            x = 95*2 + ((getDayNum(timeKey))*(graphWidth/7)*2);
             y = 45*2 + (((day['startTime'] - timeMin)/(timeMax - timeMin))*graphHeight*2);
             width = graphWidth/7*2;
             height = (((day['endTime'] - day['startTime'])/(timeMax - timeMin))*graphHeight*2);
             context.fillRect(x + 2,y + 2, width - 4, height + 2);
             context.fillStyle = "black";
-		    context.font = "25px Arial";
-		    context.textAlign = 'center';
-		    text = uniClass.name;
+	    context.font = "25px Arial";
+	    context.textAlign = 'center';
+	    text = uniClass.name;
             textWidth = context.measureText(text).width;
             while(textWidth > 275){
                 text = text.slice(0,text.length-1);
@@ -204,7 +201,7 @@ function drawClasses(){
             context.fillText(text, x + (width/2), y+22+(height/4));
 
             if(height >= 75){
-                time = uniClass.startTime+"-"+uniClass.endTime;
+                time = day.start+"-"+day.end;
                 context.fillText(time, x + (width/2), y+30+(height/2));
             }
         }
@@ -233,7 +230,7 @@ function clickClass(e, canvas){
     for(classKey in classes){
         uniClass = classes[ClassKey];
         for(timeKey in uniClass.classTimes){
-            day = uniClass.classTimes[timeKey]
+            day = uniClass.classTimes[timeKey];
             x = 95*2 + ((getDayNum(timeKey))*(graphWidth/7)*2) + 2;
             y = 45*2 + (((day['startTime'] - timeMin)/(timeMax - timeMin))*graphHeight*2) + 2;
             width = graphWidth/7*2 - 4;
@@ -255,70 +252,69 @@ function getDayNum(day){
 }
 
 function queryClasses(){
-	if($("#query_select").text() == "CRN"){
-		var crn = $("#crn_input").val();
-		$.ajax({url:"/",
-			type:'GET',
-			data: {'id':crn}, 
-			success: function(data){
-					var classDict = JSON.parse(data);
-					var newClass = new UnivClass();		
-					var days = classDict["days"];
-					var daysOfClass = [];
-					var times = classDict["time"];		
-					var week = ['M','T','W','R','F','S'];
-					for(var i in week){				
-						if(days.search(week[i]) != -1){
-							daysOfClass.push(i);
-						}
-					}
-					newClass.daysOfWeek = daysOfClass;
-					times = times.split("-");
-					for(var i in times){
-						times[i] = times[i].replace(" ","");
-						times[i] = times[i].replace(" ","");
-						if(times[i].charAt(0) == "0"){
-							times[i] = times[i].substring(1);			
-						}		
-					}
-					newClass.startTime = times[0];
-					newClass.start = timeStringToTime(times[0]);
-					newClass.endTime = times[1];
-					newClass.end = timeStringToTime(times[1]);
-					newClass.color = $("#color_picker2").val();
-					newClass.name = class_dict["subj_code"].concat(" ");
-					newClass.name = newClass.name.concat(classDict["course_no"]);
-					newClass.name = newClass.name.concat(" - ");
-					newClass.name = newClass.name.concat(classDict["sec"]);
-					newClass.crn = classDict["CRN"];
-					console.log(newClass.crn);
-					if(errorCheck(newClass)){
-						addClassToLS(newClass);
-						$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
-						drawClasses();
-						resetForm();
-					}
-		}});
-	}
-	else{
-		var title = $("#crn_input").val();
-		$.ajax({url:"/",
-			type:'GET',
-			data: {'title':crn}, 
-			success:function(data){
-				console.log(JSON.parse(data));
+    if($("#query_select").text() == "CRN"){
+	var crn = $("#crn_input").val();
+	$.ajax({url:"/",
+		type:'GET',
+		data: {'id':crn}, 
+		success: function(data){
+		    var classDict = JSON.parse(data);
+		    var newClass = new UnivClass();		
+		    var days = classDict["days"];
+		    var daysOfClass = [];
+		    var times = classDict["time"];		
+		    var week = ['M','T','W','R','F','S'];
+		    for(var i in week){				
+			if(days.search(week[i]) != -1){
+			    daysOfClass.push(i);
 			}
-		});
-	}
+		    }
+		    newClass.daysOfWeek = daysOfClass;
+		    times = times.split("-");
+		    for(var i in times){
+			times[i] = times[i].replace(" ","");
+			times[i] = times[i].replace(" ","");
+			if(times[i].charAt(0) == "0"){
+			    times[i] = times[i].substring(1);			
+			}		
+		    }
+		    newClass.startTime = times[0];
+		    newClass.start = timeStringToTime(times[0]);
+		    newClass.endTime = times[1];
+		    newClass.end = timeStringToTime(times[1]);
+		    newClass.color = $("#color_picker2").val();
+		    newClass.name = class_dict["subj_code"].concat(" ");
+		    newClass.name = newClass.name.concat(classDict["course_no"]);
+		    newClass.name = newClass.name.concat(" - ");
+		    newClass.name = newClass.name.concat(classDict["sec"]);
+		    newClass.crn = classDict["CRN"];
+		    if(errorCheck(newClass)){
+			addClassToLS(newClass);
+			$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+			drawClasses();
+			resetForm();
+		    }
+	    }});
+    }
+    else{
+	var title = $("#crn_input").val();
+	$.ajax({url:"/",
+		type:'GET',
+		data: {'title':crn}, 
+		success:function(data){
+		    console.log(JSON.parse(data));
+		}
+	});
+    }
 }
 
 function setScheduleItem()
 {
-	var newClass = new UnivClass();
+    var newClass = new UnivClass();
     newClass.crn = $("#crn").val();	
     newClass.name = $("#class_name").val();
-	newClass.color = $("#color_picker").css('background-color');
-    newClass.classTimes = []
+    newClass.color = $("#color1").css('background-color');
+    newClass.classTimes = {};
     if($('.selected_day_choice').attr('id') == 'different_times'){
         $('.selected_day').each(function(){
             var key = $(this).attr('id');
@@ -339,45 +335,44 @@ function setScheduleItem()
             newClass.classTimes[key]['endTime'] = timeStringToTime(newClass.classTimes[key]['end']);
         });
     }
-	if(errorCheck(newClass)){
-		addClassToLS(newClass);
-		$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
-		drawClasses();
-		resetForm();
-	}
+    if(errorCheck(newClass)){
+	addClassToLS(newClass);
+	$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+	drawClasses();
+	resetForm();
+    }
 }
 
 function removeClass(){
     var deletedItem = $("#class_select").val();
-	removeClassFromLS(deleted_item);
-	$("#class_select option:selected").remove()
-	drawClasses();
+    removeClassFromLS(deletedItem);
+    $("#class_select option:selected").remove();
+    drawClasses();
 }
 
 function errorCheck(newClass){
-	var errorBox = $("#error_box");
-	var classMatch = classOverlap(newClass);
-
-	if(!areClassTimesValid(newClass)){
-		errorBox.text("end time can't be before or the same as start time");
-	}
-	else if(newClass.name === ""){
-		errorBox.text("can't leave class name blank");
-	}
-	else if(Object.keys(newClass.classTimes).length === 0){
-        errorBox.text("you must select at least one day of the week");
-	}
-	else if(sameClassName(newClass)){
-		errorBox.text("can't have a class with the same name");
-	}
-	else if(classMatch != false){
-		errorBox.text("overlaps with class: " + classMatch);
-	}
-	else{
-		errorBox.text("");
-		return true;
-	}
-	return false;
+    var errorBox = $("#error_box");
+    var classMatch = classOverlap(newClass);
+    if(!areClassTimesValid(newClass)){
+	errorBox.text("end time can't be before or the same as start time");
+    }
+    else if(newClass.name === ""){
+	errorBox.text("can't leave class name blank");
+    }
+    else if(Object.keys(newClass.classTimes).length === 0){
+    errorBox.text("you must select at least one day of the week");
+    }
+    else if(sameClassName(newClass)){
+	errorBox.text("can't have a class with the same name");
+    }
+    else if(classMatch != false){
+	errorBox.text("overlaps with class: " + classMatch);
+    }
+    else{
+	errorBox.text("");
+	return true;
+    }
+    return false;
 }
 
 function areClassTimesValid(newClass){
@@ -392,54 +387,54 @@ function areClassTimesValid(newClass){
 }
 
 function sameClassName(newClass){
-	var classes = JSON.parse(localStorage['classes']);
+    var classes = JSON.parse(localStorage['classes']);
     for(classKey in classes){
-		if(classes[classKey].name === newClass.name){
-			return true;
-		}
+	if(classes[classKey].name === newClass.name){
+	    return true;
 	}
-	return false;
+    }
+    return false;
 }
 
 function classOverlap(newClass){
-	var compareClass;
+    var compareClass;
     var classes = JSON.parse(localStorage['classes']);
     
     for(classKey in classes){
         compareClass = classes[classKey]; 
         for(day in compareClass.classTimes){
-		    if(day in newClass.classTimes){
-			    newClassTimes = newClass.classTimes[day]
+	    if(day in newClass.classTimes){
+		newClassTimes = newClass.classTimes[day]
                 compareClassTimes = compareClass.classTimes[day]
                 if(!(compareClass.start >=  newClass.end ||  classCompare.end <=  newClass.start)){
-				    return classCompare.name;
+		    return classCompare.name;
                 }
             }
         }
-	}
-	return false;
+    }
+    return false;
 }
 
 function resetForm(){
-	$(".day").attr("checked", false);
-	$("#class_name").val("");
-	$("#time_start").val("0");
-	$("#time_end").val("0");
-	$("#color_picker").val("#00FFFF");
-	$("#crn").val("");
+    $(".selected_day").removeClass("selected_day");
+    $("#class_name").val("");
+    $("#time_start").val("am");
+    $("#time_end").val("am");
+    $("#color1").css("background-color", "#3289c7");
+    $("#crn").val("");
 }
 
 function getClasses(){
-	try{
+    try{
         var classes = JSON.parse(localStorage['classes']);
-	    for(key in classes){
-		    try{
-                if(classes[key].version !== "0.4") throw "outdated UnivClass object";
-                $("#class_select").append( $('<option></option>').val(classes[key].name).html(classes[key].name +" - " + JSON.parse(localStorage[key]).crn));
-                drawClasses();
-            }
-            catch(err){
-                console.log(err.message);
+	for(key in classes){
+	    try{
+	        if(classes[key].version !== "0.4") throw "outdated UnivClass object";
+	        $("#class_select").append( $('<option></option>').val(classes[key].name).html(classes[key].name +" - " + classes[key].crn));
+	        drawClasses();
+	    }
+	    catch(err){
+		console.log(err.message);
                 clearLocalStorage();
             }
         }
@@ -473,10 +468,10 @@ function clearLocalStorage(){
 }
 
 function UnivClass(){
-	this.classTimes;
-	this.name;
-	this.color;
-	this.crn;
+    this.classTimes;
+    this.name;
+    this.color;
+    this.crn;
     this.version = "0.4";
 }
 

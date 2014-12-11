@@ -2,7 +2,7 @@ import os
 import webapp2
 import jinja2
 import json
-from models import UnivClass
+#from py_files.models import UnivClass
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
