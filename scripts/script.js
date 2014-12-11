@@ -318,10 +318,11 @@ function setScheduleItem()
     if($('.selected_day_choice').attr('id') == 'different_times'){
         $('.selected_day').each(function(){
             var key = $(this).attr('id');
+            var timeEntry = $(this).children('.time_entry');
             newClass.classTimes[key] = {};
-            newClass.classTimes[key]['start'] = $(this).children('.start').val() + $(this).children('.start_select option:selected').text();
-            newClass.classTimes[key]['startTime'] = TimeStringToTime(newClass.classTimes[key]['start']);
-            newClass.classTimes[key]['end'] = $(this).children('.end').val() + $(this).children('.end_select option:selected').text();
+            newClass.classTimes[key]['start'] = timeEntry.children('.start').val() + timeEntry.children('.start_select').children('option:selected').val();
+            newClass.classTimes[key]['startTime'] = timeStringToTime(newClass.classTimes[key]['start']);
+            newClass.classTimes[key]['end'] = timeEntry.children('.end').val() + timeEntry.children('.end_select').children('option:selected').text();
             newClass.classTimes[key]['endTime'] = timeStringToTime(newClass.classTimes[key]['end']);          
         }); 
     }
@@ -406,8 +407,8 @@ function classOverlap(newClass){
 	    if(day in newClass.classTimes){
 		newClassTimes = newClass.classTimes[day]
                 compareClassTimes = compareClass.classTimes[day]
-                if(!(compareClass.start >=  newClass.end ||  classCompare.end <=  newClass.start)){
-		    return classCompare.name;
+                if(!(compareClass.start >=  newClass.end ||  compareClass.end <=  newClass.start)){
+		    return compareClass.name;
                 }
             }
         }
@@ -416,12 +417,21 @@ function classOverlap(newClass){
 }
 
 function resetForm(){
-    $(".selected_day").removeClass("selected_day");
-    $("#class_name").val("");
-    $("#time_start").val("am");
-    $("#time_end").val("am");
     $("#color1").css("background-color", "#3289c7");
     $("#crn").val("");
+    $(".selected_day").removeClass("selected_day");
+    $("#class_name").val("");
+
+    if($('.selected_day_choice').attr('id') == 'different_times'){
+        $('.start').val('');
+        $('.end').val('');
+        $('.start_select').val('am');
+        $('.end_select').val('am');
+    }
+    else{
+        $("#time_start").val("am");
+        $("#time_end").val("am");
+    }
 }
 
 function getClasses(){
@@ -429,7 +439,7 @@ function getClasses(){
         var classes = JSON.parse(localStorage['classes']);
 	for(key in classes){
 	    try{
-	        if(classes[key].version !== "0.4") throw "outdated UnivClass object";
+	        if(classes[key].version < 0.4) throw "outdated UnivClass object";
 	        $("#class_select").append( $('<option></option>').val(classes[key].name).html(classes[key].name +" - " + classes[key].crn));
 	        drawClasses();
 	    }
@@ -472,7 +482,7 @@ function UnivClass(){
     this.name;
     this.color;
     this.crn;
-    this.version = "0.4";
+    this.version = 0.4;
 }
 
 function timeStringToTime(timeString){

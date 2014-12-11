@@ -109,6 +109,9 @@ background-color:#EBB7ED;
 .open_time_entry{
 background-color:#f86bff;
 }
+.end_select{
+width:48px;
+}
 #time_div{
 float:left;
 margin-top:10px;
