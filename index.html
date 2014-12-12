@@ -170,28 +170,44 @@
 			</div>
 			<br>
 			<div id='color'>color <div id='color1' class="color_picker"></div></div>
-			<div id='add_class'>add class</div>
+			<div id='add_class' class='class_button'>add class</div>
 		    </div>
 		    <div id="ui2" class="uiclass">
-			query by: 
-			<select id="query_select">
-			    <option>CRN</option>
-			    <option>SUBJECT</option>		
-			    <option>NAME</option>
-			</select>
-			<br>
-			subject: 
-			<select id="subject_id"></select>
-			subject code:
-			<input id="subject_number">
-			<br>
-			<span id='query_topic'>crn: </span>
-			<input id="crn_input">
-			<input type="button" value="add class" onclick="queryClasses()">			
-			<span style="margin-left:50px">color:<span>
-			<select id="color_picker2">
-			</select>			
+			<div id="subject">
+                subject: 
+			    <select id="subject_id"></select>
+			    <span style="margin-left:30px">subject code:</span>
+                <input id="subject_number">
+			    <input type="radio" style="margin-left:10px" name="query" value="subject" checked>
+            </div>
+			<hr class="query_seperator">
+            <div id="crn">
+                <span style="margin-left:118px">crn:</span>
+			    <input id="crn_input">
+                <input type="radio" style="margin-left:10px" name="query" value="crn"> 
+            </div>
+            <hr class="query_seperator">
+            <div id="class_name">
+                <span style="margin-left:122px">class name:</span>
+                <input id="crs_name">
+                <input type="radio" style="margin-left:10px" name="query" value="name">
+            </div>
+			<div id="ui2_bottom_container">
+                <div style="margin-left:168px">
+                    <span style="margin-left:53px">term: </span>
+                    <select style="margin-left:20px" id="term_select">
+                        <option>spring</option>
+                        <option>summer</option>
+                        <option>fall</option>
+                        <option>winter</option>
+                    </select>
+                    <br>
+                    <span style="margin-left:50px">color:<span>
+			        <div id="color2" class="color_picker"></div>
+			    </div>
+                <div id="query_button" class="class_button">find class</div>
 		    </div>
+            </div>
 		</div>
 	    <hr style='margin-top:15px; margin-bottom:5px;border-style:dashed; border-color:#e3b8df'>
             <div id="error_box"></div>

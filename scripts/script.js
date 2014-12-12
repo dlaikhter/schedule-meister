@@ -1,13 +1,14 @@
 var graphWidth = 1100;
 var graphHeight = 560;
-var hourStart = 8; //8am
-var hourEnd = 12+10; //10pm
-var timeMin = hourStart*60;
-var timeMax = hourEnd*60;
+var hourStart = "8:00am"
+var hourEnd = "10:00pm"
+var timeMin = timeStringToTime(hourStart);
+var timeMax = timeStringToTime(hourEnd);
 
 $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
+    var clickeable = true;
      
     $("#ui2").hide();
     $(".time_entry").hide(); 
@@ -18,8 +19,9 @@ function(){
             $(this).addClass('selected_day_choice');
             if($(this).attr('id') == 'same_time'){
                 $("#time_div").stop().slideDown();
-		$(".time_entry").stop().slideUp();
-	    }else{
+		        $(".time_entry").stop().slideUp();
+	            clickeable = true;
+        }else{
                 $("#time_div").stop().slideUp();
 	    }
     }});
@@ -31,12 +33,19 @@ function(){
     });
      
     $("#add_class")
+    .click(function(){
+        if(clickeable){
+            setScheduleItem();
+        }
+    });
+    
+    $(".class_button")
     .mousedown(function(){
         $(this).css('background-color', 'ab38e0').css('border-color', '#aa34d9')
     })
     .mouseup(function(){
         $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
-        setScheduleItem();
+        
     })
     .mouseout(function(){
         $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
@@ -59,6 +68,7 @@ function(){
 	    $(this).addClass('selected_day');
 	    $(this).addClass('open_time_entry');
 	    timeEntry.show();
+        clickeable = false;
 	}
         else if($("#same_time").hasClass('selected_day_choice') && $(this).hasClass("selected_day")){
 	    $(this).removeClass('selected_day');
@@ -74,12 +84,14 @@ function(){
 	$(this).parent().parent().removeClass('open_time_entry');
 	$(this).parent().hide();
 	e.stopPropagation();
+    clickeable = true;
     });
 
     $(document)
     .mouseup(function(e){
 	if($(e.target).attr('class') != 'time_entry' && $(e.target).parent().attr('class') != 'time_entry'){
 	    $(".time_entry").hide().parent().removeClass('open_time_entry');
+        clickeable = true;
     }});
    
 
@@ -357,6 +369,9 @@ function errorCheck(newClass){
     if(!areClassTimesValid(newClass)){
 	errorBox.text("end time can't be before or the same as start time");
     }
+    else if(verifyTimeFormat(newClass)){
+    errorBox.text("times aren't valid");
+    }
     else if(newClass.name === ""){
 	errorBox.text("can't leave class name blank");
     }
@@ -385,6 +400,32 @@ function areClassTimesValid(newClass){
         }
     }
     return true;
+}
+
+function verifyTimeFormat(newClass){
+    var pattern = '^[0-9]{1,2}:\d\d(am|pm)';
+    for (dayOfWeek in newClass.classTimes){
+        var times = newClass.classTimes[dayOfWeek];
+        var start = times['start'];
+        var end = times['end'];
+        
+        if(start.search(pattern) == -1 || end.search(pattern) == -1){
+            return false;
+        }
+        
+        var startMinutes = parseInt(start.substring(start.length-4, start.length - 2));
+        var endMinutes = parseInt(end.substring(end.length-4, end.length - 2));
+     
+        if(startMinutes > 60 || endMinutes > 60){
+            return false;
+        }
+        else if(times['startTime'] >= timeMax || times['endTime'] > timeMax || times['startTime'] < timeMin || times['endTime'] <= timeMin){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
 }
 
 function sameClassName(newClass){

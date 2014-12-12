@@ -165,6 +165,56 @@ cursor:pointer;
 -o-user-select: none;
 user-select: none;
 }
+.query_seperator{
+border: 0;
+height: 1px;
+width:80%; 
+background-image: -webkit-linear-gradient(left, rgba(230,158,211,.25), rgba(230,158,211,0.75), rgba(230,158,211,0.25));
+background-image: -moz-linear-gradient(left, rgba(230,158,211,0.25), rgba(230,158,211,0.75), rgba(230,158,211,0.25));
+background-image: -ms-linear-gradient(left, rgba(230,158,211,0.25), rgba(230,158,211,0.75), rgba(230,158,211,0.25));
+background-image: -o-linear-gradient(left, rgba(230,158,211,0.25), rgba(230,158,211,0.75), rgba(230,158,211,0.25)); 
+margin:auto;
+margin-top:10px;
+margin-bottom:10px;
+}
+#subject_number{
+margin-left:20px
+}
+#crn_input{
+margin-left:20px
+}
+#crs_name{
+margin-left:20px
+}
+#ui2_bottom_container{
+margin-top:30px;
+}
+#color2{
+margin-left:20px
+}
+#query_button{
+position:relative;
+left:26%;
+background-color:#ed2bff;
+height:50px;
+width:200px;
+color:white;
+font-size:20px;
+text-align:center;
+line-height:50px;
+border-radius:5px;
+border-style:solid;
+border-width:1px;
+border-color:#ca35e8;
+margin-top:20px;
+cursor:pointer;
+-webkit-user-select: none; /* Chrome/Safari */
+-moz-user-select: none; /* Firefox */
+-ms-user-select: none; /* IE10+ */
+/* Rules below not implemented in browsers yet */
+-o-user-select: none;
+user-select: none;
+}
 #ui3{
 width:400px;
 height:100px;
