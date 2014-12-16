@@ -264,11 +264,11 @@ function getDayNum(day){
 }
 
 function queryClasses(){
-    if($("#query_select").text() == "CRN"){
-	var crn = $("#crn_input").val();
-	$.ajax({url:"/",
+	var request = createRequest();
+
+    $.ajax({url:"/",
 		type:'GET',
-		data: {'id':crn}, 
+		data: {'fetch_request':request}, 
 		success: function(data){
 		    var classDict = JSON.parse(data);
 		    var newClass = new UnivClass();		
@@ -277,47 +277,57 @@ function queryClasses(){
 		    var times = classDict["time"];		
 		    var week = ['M','T','W','R','F','S'];
 		    for(var i in week){				
-			if(days.search(week[i]) != -1){
-			    daysOfClass.push(i);
-			}
+			    if(days.search(week[i]) != -1){
+			        daysOfClass.push(i);
+			    }
 		    }
 		    newClass.daysOfWeek = daysOfClass;
 		    times = times.split("-");
 		    for(var i in times){
-			times[i] = times[i].replace(" ","");
-			times[i] = times[i].replace(" ","");
-			if(times[i].charAt(0) == "0"){
-			    times[i] = times[i].substring(1);			
-			}		
+			    times[i] = times[i].replace(" ","");
+			    times[i] = times[i].replace(" ","");
+			    if(times[i].charAt(0) == "0"){
+			        times[i] = times[i].substring(1);			
+			    }		
 		    }
 		    newClass.startTime = times[0];
 		    newClass.start = timeStringToTime(times[0]);
-		    newClass.endTime = times[1];
-		    newClass.end = timeStringToTime(times[1]);
-		    newClass.color = $("#color_picker2").val();
-		    newClass.name = class_dict["subj_code"].concat(" ");
-		    newClass.name = newClass.name.concat(classDict["course_no"]);
-		    newClass.name = newClass.name.concat(" - ");
-		    newClass.name = newClass.name.concat(classDict["sec"]);
-		    newClass.crn = classDict["CRN"];
-		    if(errorCheck(newClass)){
-			addClassToLS(newClass);
-			$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
-			drawClasses();
-			resetForm();
-		    }
-	    }});
+            newClass.endTime = times[1];
+            newClass.end = timeStringToTime(times[1]);
+            newClass.color = $("#color2").val();
+            newClass.name = class_dict["subj_code"].concat(" ");
+            newClass.name = newClass.name.concat(classDict["course_no"]);
+            newClass.name = newClass.name.concat(" - ");
+            newClass.name = newClass.name.concat(classDict["sec"]);
+            newClass.crn = classDict["CRN"];
+            if(errorCheck(newClass)){
+                addClassToLS(newClass);
+                $("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+                drawClasses();
+                resetForm();
+            }    
+    }});      
+}
+
+function createRequest(){
+    var request = {};
+    var method = $("input[name='query']:checked").val();
+   
+    request["term"] = $("#term_select").val();
+
+    if(method == "crn"){
+        request["crn"] = $("#crn_input").val();
+    }
+    else if(method == "subject"){
+        request["subject"] = $("#subject_id").val();
+        request["subject_number"] = $("#subject_number").val();
     }
     else{
-	var title = $("#crn_input").val();
-	$.ajax({url:"/",
-		type:'GET',
-		data: {'title':crn}, 
-		success:function(data){
-		    console.log(JSON.parse(data));
-		}
-	});
+        request["title"] = $("#crs_name").val();
     }
+    console.log(method);
+
+    return request;
 }
 
 function setScheduleItem()

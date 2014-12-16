@@ -8,6 +8,19 @@ from models import UnivClass
 from google.appengine.ext import db
 
 
+def create_dict(day): 
+        days_of_week = ['M', 'T', 'W', 'R', 'F', 'S']
+        temp_dict = {}
+        pair = day.findAll("td")
+        for day in list(pair[0].text):
+            try:
+                days_of_week.index(day)
+                temp_dict[day] = pair[1].text
+            except:
+                return {}
+        return temp_dict
+
+
 def get_subjects():
     while True:
         url = url_queue.get()
@@ -48,8 +61,7 @@ def get_classes():
                 course["sec"] = items[4].text
                 course["CRN"] = items[5].text
                 course["title"] = items[6].text.lower().replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"') .replace('&#39;', "'").split(" ")
-                course["days"] = items[8].text
-                course["time"] = items[9].text
+                course["days_time"] = items[7].text
                 course["instructor"] = items[len(items)-1].text
 
                 new_class = UnivClass(key_name=course["CRN"],
@@ -59,9 +71,18 @@ def get_classes():
                                       class_type=course["type"],
                                       sec=course["sec"],
                                       title=course["title"],
-                                      days=course["days"],
-                                      time=course["time"],
+                                      days=[],
+                                      time=[],
                                       instructor=course["instructor"])
+                
+                temp_dict = {}
+                for day in course["day_times"].findAll("tr"): 
+                    temp_dict = dict(temp_dict.items() + create_dict(day).items())
+                else:
+                    for key, value in temp_dict.iteritems():
+                        new_class.days.append(key)
+                        new_class.time.append(value)
+                
                 courses.append(new_class)
 
         db.put(courses)
