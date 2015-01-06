@@ -2,9 +2,10 @@ import sys
 import urllib2
 sys.path.insert(0, 'libs')
 from BeautifulSoup import BeautifulSoup
+sys.path.insert(0, 'models')
+from univclass import UnivClass
 from Queue import Queue
 from threading import Thread
-from models import UnivClass
 from google.appengine.ext import db
 
 

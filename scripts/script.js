@@ -31,6 +31,11 @@ function(){
         params = { imgdata : canvas.toDataURL('image/jpeg') };
         $.post('/save', params, function (data) { /* ... */ }) 
     });
+    
+    $("#query_button")
+    .click(function(){
+        queryClasses();    
+    });
      
     $("#add_class")
     .click(function(){
@@ -266,7 +271,7 @@ function getDayNum(day){
 function queryClasses(){
 	var request = createRequest();
 
-    $.ajax({url:"/",
+    $.ajax({url:"/fetcher/",
 		type:'GET',
 		data: {'fetch_request':request}, 
 		success: function(data){

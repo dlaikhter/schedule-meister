@@ -2,7 +2,7 @@ application: schedule-meister
 version: 1
 runtime: python27
 api_version: 1
-threadsafe: false
+threadsafe: false 
 
 handlers:
 - url: /scraper
@@ -12,9 +12,6 @@ handlers:
 - url: /deleter
   script: py_files/deleter.py
   login: admin
-
-- url: /fetch_classes
-  script: py_files/fetch_classes.py
 
 - url: /save
   script: py_files/save.py
