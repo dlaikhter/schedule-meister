@@ -1,4 +1,5 @@
 import sys
+import json
 import urllib2
 sys.path.insert(0, 'libs')
 from BeautifulSoup import BeautifulSoup
@@ -7,9 +8,11 @@ from univclass import UnivClass
 from Queue import Queue
 from threading import Thread
 from google.appengine.ext import db
+sys.path.insert(0, 'py_files')
+from utilities_meister import approximate_semester
 
 
-def create_dict(day): 
+def create_dict(day):
         days_of_week = ['M', 'T', 'W', 'R', 'F', 'S']
         temp_dict = {}
         pair = day.findAll("td")
@@ -62,7 +65,7 @@ def get_classes():
                 course["sec"] = items[4].text
                 course["CRN"] = items[5].text
                 course["title"] = items[6].text.lower().replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"') .replace('&#39;', "'").split(" ")
-                course["days_time"] = items[7].text
+                course["day_times"] = items[7]
                 course["instructor"] = items[len(items)-1].text
 
                 new_class = UnivClass(key_name=course["CRN"],
@@ -72,18 +75,14 @@ def get_classes():
                                       class_type=course["type"],
                                       sec=course["sec"],
                                       title=course["title"],
-                                      days=[],
-                                      time=[],
+                                      day_times="",
                                       instructor=course["instructor"])
                 
                 temp_dict = {}
                 for day in course["day_times"].findAll("tr"): 
                     temp_dict = dict(temp_dict.items() + create_dict(day).items())
-                else:
-                    for key, value in temp_dict.iteritems():
-                        new_class.days.append(key)
-                        new_class.time.append(value)
-                
+                new_class.day_times = json.dumps(temp_dict)
+
                 courses.append(new_class)
 
         db.put(courses)
@@ -103,8 +102,13 @@ while True:
         pass
 home_page = BeautifulSoup(html)
 
+
+terms = [term for key, term in approximate_semester().iteritems()]
+
 for tag in home_page.findAll("div", {"class": "term"}):
-    semesters.append(tag.a["href"])
+    link = tag.a
+    if link.text in terms:
+        semesters.append(link["href"])
 
 for semester in semesters:
     while True:

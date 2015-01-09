@@ -1,8 +1,11 @@
+import sys
 import os
 import webapp2
 import jinja2
 import json
 from models import UnivClass
+sys.path.insert(0, 'py_files') 
+from utilities_meister import approximate_semester 
 
 
 def class_to_json(course):
@@ -12,8 +15,7 @@ def class_to_json(course):
             "class_type": course.class_type,
             "sec": course.sec,
             "title": course.title,
-            "days": course.days,
-            "time": course.time,
+            "day_times": course.day_times,
             "instructor": course.instructor,
             "term": course.term}
 
@@ -29,7 +31,7 @@ def query_classes(fetch_request):
         title_parts = fetch_request('title').split()
         gql_string = "SELECT * FROM title WHERE term={term}".format(term=fetch_request['term'])
         for title in title_parts:
-            gql_string.join(' AND title={title}'.format(title=title))
+            gql_string += ' AND title={title}'.format(title=title))
         courses = UnivClass.gql(gql_string)
 
         for course in courses:
@@ -42,9 +44,9 @@ def query_classes(fetch_request):
         courses_json_list = []
         gql_string = "SELECT * FROM title WHERE term={term}".format(term=fetch_request('term')) 
         if 'subject' in fetch_request:
-            gql_string = gql_string.join(' AND {subj_code}').format(subj_code=fetch_request['subject'])
+            gql_string = gql_string + ' AND {subj_code}'.format(subj_code=fetch_request['subject'])
         if 'subject_number' in fetch_request:
-            gql_string = gql_string.join(' AND {subj_num}').format(subj_code=fetch_request['subject_number'])
+            gql_string = gql_string + ' AND {subj_num}'.format(subj_code=fetch_request['subject_number'])
 
         courses = UnivClass.gql(gql_string)
 
@@ -75,3 +77,8 @@ class Fetcher(webapp2.RequestHandler):
     def get(self):
         #self.response.out.write(query_classes(self.request.body))
         self.response.out.write("Hello there!")
+
+
+class TermGetter(webapp2.RequestHandler):
+    def get(self):
+        self.response.out.write(json.dumps(approximate_semester()))
