@@ -3,9 +3,10 @@ import os
 import webapp2
 import jinja2
 import json
-from models import UnivClass
-sys.path.insert(0, 'py_files') 
-from utilities_meister import approximate_semester 
+sys.path.insert(0, 'models')
+from univclass import UnivClass
+sys.path.insert(0, 'py_files')
+from utilities_meister import approximate_semester
 
 
 def class_to_json(course):
@@ -31,7 +32,7 @@ def query_classes(fetch_request):
         title_parts = fetch_request('title').split()
         gql_string = "SELECT * FROM title WHERE term={term}".format(term=fetch_request['term'])
         for title in title_parts:
-            gql_string += ' AND title={title}'.format(title=title))
+            gql_string += ' AND title={title}'.format(title=title)
         courses = UnivClass.gql(gql_string)
 
         for course in courses:
@@ -42,7 +43,7 @@ def query_classes(fetch_request):
 
     elif 'subject' in fetch_request or 'subject_number' in fetch_request:
         courses_json_list = []
-        gql_string = "SELECT * FROM title WHERE term={term}".format(term=fetch_request('term')) 
+        gql_string = "SELECT * FROM title WHERE term={term}".format(term=fetch_request('term'))
         if 'subject' in fetch_request:
             gql_string = gql_string + ' AND {subj_code}'.format(subj_code=fetch_request['subject'])
         if 'subject_number' in fetch_request:

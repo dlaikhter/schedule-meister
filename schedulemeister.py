@@ -6,6 +6,6 @@ import webapp2
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/fetcher/', Fetcher)
+    ('/fetcher/', Fetcher),
     ('/term/', TermGetter)
 ], debug=True)

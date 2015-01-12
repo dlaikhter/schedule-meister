@@ -134,6 +134,7 @@ function(){
     getClasses();
     canvas.onclick = function(e){clickClass(e, canvas)}
     addSubjects();
+    addTerms();
 });
 
 function addSubjects(){
@@ -142,6 +143,17 @@ function addSubjects(){
     for(var i in subjects){
         $('#subject_id').append($('<option></option>').val(subjects[i]).html(subjects[i]));
     }
+}
+
+function addTerms(){
+    $.ajax({url:"/term/",
+		type:'GET',
+		success: function(data){
+		    var termDict = JSON.parse(data);
+            for(var i in terms){
+                $("#term_select").append($('<option></option>').val(terms[i]).html(terms[i]));
+            }
+        }});
 }
 
 function drawCanvas(){
