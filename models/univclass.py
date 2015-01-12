@@ -1,11 +1,13 @@
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
-class UnivClass(db.Model):
-        term = db.StringProperty()
-        subj_code = db.StringProperty()
-        course_no = db.StringProperty()
-        class_type = db.StringProperty()
-        sec = db.StringProperty()
-        title = db.ListProperty(str)
-        day_times = db.StringProperty(str)
-        instructor = db.StringProperty()
+
+class UnivClass(ndb.Model):
+        term = ndb.StringProperty()
+        subj_code = ndb.StringProperty()
+        course_no = ndb.StringProperty()
+        class_type = ndb.StringProperty()
+        sec = ndb.StringProperty()
+        title = ndb.StringProperty(repeated=True)
+        day_times = ndb.StringProperty()
+        instructor = ndb.StringProperty()
+        status = ndb.StringProperty()

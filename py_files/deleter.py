@@ -1,8 +1,9 @@
 import sys
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 sys.path.insert(0, 'models')
 from univclass import UnivClass
 
-query = UnivClass.all(keys_only=True)
-entries = query.fetch(1000)
-db.delete(entries)
+
+ndb.delete_multi(
+    UnivClass.query().fetch(keys_only=True)
+    )

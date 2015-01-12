@@ -7,7 +7,7 @@ sys.path.insert(0, 'models')
 from univclass import UnivClass
 from Queue import Queue
 from threading import Thread
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 sys.path.insert(0, 'py_files')
 from utilities_meister import approximate_semester
 
@@ -64,11 +64,11 @@ def get_classes():
                 course["type"] = items[2].text.replace('&amp;', '&')
                 course["sec"] = items[4].text
                 course["CRN"] = items[5].text
-                course["title"] = items[6].text.lower().replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"') .replace('&#39;', "'").split(" ")
+                course["title"] = items[6].text.lower().replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'").split()
                 course["day_times"] = items[7]
                 course["instructor"] = items[len(items)-1].text
 
-                new_class = UnivClass(key_name=course["CRN"],
+                new_class = UnivClass(id=course["CRN"],
                                       term=term,
                                       subj_code=course["subj_code"],
                                       course_no=course["course_no"],
@@ -82,10 +82,15 @@ def get_classes():
                 for day in course["day_times"].findAll("tr"): 
                     temp_dict = dict(temp_dict.items() + create_dict(day).items())
                 new_class.day_times = json.dumps(temp_dict)
+                
+                if items[5].find('p')["title"] == "FULL":
+                    new_class.status = "FULL"
+                else:
+                    new_class.status = "OK"
 
                 courses.append(new_class)
 
-        db.put(courses)
+        ndb.put_multi(courses)
         url_queue2.task_done()
 
 

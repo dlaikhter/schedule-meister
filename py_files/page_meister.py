@@ -11,21 +11,21 @@ from utilities_meister import approximate_semester
 
 def class_to_json(course):
     return {"subj_code": course.subj_code,
-            "CRN": course.key(),
+            "CRN": course.key.id(),
             "course_no": course.course_no,
             "class_type": course.class_type,
             "sec": course.sec,
             "title": course.title,
-            "day_times": course.day_times,
+            "day_times": json.loads(course.day_times),
             "instructor": course.instructor,
             "term": course.term}
 
 
 def query_classes(fetch_request):
     if "crn" in fetch_request:
-        course = UnivClass.get_by_key_name(str(fetch_request["crn"]))
-        course = class_to_json(course)
-        return json.dumps(course)
+        course = UnivClass.get_by_id(fetch_request["crn"])
+        course_json = class_to_json(course)
+        return json.dumps(course_json)
 
     elif "title" in fetch_request:
         courses_json_list = []
@@ -75,9 +75,10 @@ class MainPage(webapp2.RequestHandler):
 
 
 class Fetcher(webapp2.RequestHandler):
-    def get(self):
-        #self.response.out.write(query_classes(self.request.body))
-        self.response.out.write("Hello there!")
+    def post(self):
+        req = self.request.POST.items()
+        req_dict = dict(req)
+        self.response.out.write(query_classes(req_dict))
 
 
 class TermGetter(webapp2.RequestHandler):

@@ -1,0 +1,7 @@
+indexes:
+- kind: UnivClass
+  properties:
+  - name: term
+  - name: course_no
+  - name: subj_code
+  - name: title

@@ -46,7 +46,7 @@ function(){
     
     $(".class_button")
     .mousedown(function(){
-        $(this).css('background-color', 'ab38e0').css('border-color', '#aa34d9')
+        $(this).css('background-color', '#ab38e0').css('border-color', '#aa34d9')
     })
     .mouseup(function(){
         $(this).css('background-color', '#ed2bff').css('border-color', '#ca35e8')
@@ -150,9 +150,12 @@ function addTerms(){
 		type:'GET',
 		success: function(data){
 		    var termDict = JSON.parse(data);
-            for(var i in terms){
-                $("#term_select").append($('<option></option>').val(terms[i]).html(terms[i]));
-            }
+            $("#term_select").append($('<option></option>').val(termDict["previous_quarter"]).html(termDict["previous_quarter"]));
+            $("#term_select").append($('<option></option>').val(termDict["previous_semester"]).html(termDict["previous_semester"]));
+            $("#term_select").append($('<option></option>').val(termDict["current_quarter"]).html(termDict["current_quarter"]));
+            $("#term_select").append($('<option></option>').val(termDict["current_semester"]).html(termDict["current_semester"]));
+            $("#term_select").append($('<option></option>').val(termDict["next_quarter"]).html(termDict["next_quarter"]));
+            $("#term_select").append($('<option></option>').val(termDict["next_semester"]).html(termDict["next_semester"]));
         }});
 }
 
@@ -284,8 +287,8 @@ function queryClasses(){
 	var request = createRequest();
 
     $.ajax({url:"/fetcher/",
-		type:'GET',
-		data: {'fetch_request':request}, 
+		type:'POST',
+		data: request, 
 		success: function(data){
 		    var classDict = JSON.parse(data);
 		    var newClass = new UnivClass();		
