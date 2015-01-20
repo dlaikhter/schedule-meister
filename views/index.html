@@ -173,27 +173,22 @@
 			<div id='add_class' class='class_button'>add class</div>
 		    </div>
 		    <div id="ui2" class="uiclass">
-			<div id="subject">
-                subject: 
-			    <select id="subject_id"></select>
-			    <span style="margin-left:30px">subject code:</span>
-                <input id="subject_number">
-			    <input type="radio" style="margin-left:10px" name="query" value="subject" checked>
+			<div id="class_number">
+			    <span style="margin-left:40px">class number:</span>
+                <input id="cls_number">
             </div>
 			<hr class="query_seperator">
             <div id="crn">
-                <span style="margin-left:118px">crn:</span>
+                <span>crn:</span>
 			    <input id="crn_input">
-                <input type="radio" style="margin-left:10px" name="query" value="crn"> 
             </div>
             <hr class="query_seperator">
             <div id="class_name">
-                <span style="margin-left:122px">class name:</span>
+                <span style="margin-left:5px">class name:</span>
                 <input id="crs_name">
-                <input type="radio" style="margin-left:10px" name="query" value="name">
             </div>
 			<div id="ui2_bottom_container">
-                <div style="margin-left:168px">
+                <div style="margin-left:50px">
                     <span style="margin-left:53px">term: </span>
                     <select style="margin-left:20px" id="term_select">
                     </select>
@@ -220,5 +215,11 @@
 
         <div id="loading"></div>
         <div id="load_text">loading...</div>
+        
+        <div id="results_container">
+            <div id="results"></div>
+            <div id="result_info">
+            </div>
+        </div>
     </body>
 </html>

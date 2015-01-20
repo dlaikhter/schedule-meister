@@ -150,13 +150,10 @@ function addTerms(){
 		type:'GET',
 		success: function(data){
 		    var termDict = JSON.parse(data);
-            $("#term_select").append($('<option></option>').val(termDict["previous_quarter"]).html(termDict["previous_quarter"]));
-            $("#term_select").append($('<option></option>').val(termDict["previous_semester"]).html(termDict["previous_semester"]));
-            $("#term_select").append($('<option></option>').val(termDict["current_quarter"]).html(termDict["current_quarter"]));
-            $("#term_select").append($('<option></option>').val(termDict["current_semester"]).html(termDict["current_semester"]));
-            $("#term_select").append($('<option></option>').val(termDict["next_quarter"]).html(termDict["next_quarter"]));
-            $("#term_select").append($('<option></option>').val(termDict["next_semester"]).html(termDict["next_semester"]));
-        }});
+            for(var key in termDict){
+                $("#term_select").append($('<option></option>').val(key).html(termDict[key]));
+            }
+            }});
 }
 
 function drawCanvas(){
@@ -184,7 +181,7 @@ function drawCanvas(){
 	context.fillStyle = "black";
 	context.font = "30px Arial";
         context.textAlign = 'left';
-        context.fillText(times[i], 0, 100 + (600*2)/times.length*i)
+        context.fillText(times[i], 0, 100 + ((graphHeight+40)*2)/times.length*i)
     }
 }
 
@@ -285,48 +282,59 @@ function getDayNum(day){
 
 function queryClasses(){
 	var request = createRequest();
-
-    $.ajax({url:"/fetcher/",
-		type:'POST',
-		data: request, 
-		success: function(data){
-		    var classDict = JSON.parse(data);
-		    var newClass = new UnivClass();		
-		    var days = classDict["days"];
-		    var daysOfClass = [];
-		    var times = classDict["time"];		
-		    var week = ['M','T','W','R','F','S'];
-		    for(var i in week){				
-			    if(days.search(week[i]) != -1){
-			        daysOfClass.push(i);
-			    }
-		    }
-		    newClass.daysOfWeek = daysOfClass;
-		    times = times.split("-");
-		    for(var i in times){
-			    times[i] = times[i].replace(" ","");
-			    times[i] = times[i].replace(" ","");
-			    if(times[i].charAt(0) == "0"){
-			        times[i] = times[i].substring(1);			
-			    }		
-		    }
-		    newClass.startTime = times[0];
-		    newClass.start = timeStringToTime(times[0]);
-            newClass.endTime = times[1];
-            newClass.end = timeStringToTime(times[1]);
-            newClass.color = $("#color2").val();
-            newClass.name = class_dict["subj_code"].concat(" ");
-            newClass.name = newClass.name.concat(classDict["course_no"]);
-            newClass.name = newClass.name.concat(" - ");
-            newClass.name = newClass.name.concat(classDict["sec"]);
-            newClass.crn = classDict["CRN"];
-            if(errorCheck(newClass)){
-                addClassToLS(newClass);
-                $("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
-                drawClasses();
-                resetForm();
-            }    
-    }});      
+    
+    var count = 0;
+    for(var i in request){
+        if(request[i] === ""){
+            count++;
+        }
+    }
+    if(count < 3){
+        $.ajax({url:"/get_class/",
+            type:'POST',
+            data: request, 
+            success: function(data){
+                var classDict = JSON.parse(data);
+                var newClass = new UnivClass();		
+                var days = classDict["days"];
+                var daysOfClass = [];
+                var times = classDict["time"];		
+                var week = ['M','T','W','R','F','S'];
+                for(var i in week){				
+                    if(days.search(week[i]) != -1){
+                        daysOfClass.push(i);
+                    }
+                }
+                newClass.daysOfWeek = daysOfClass;
+                times = times.split("-");
+                for(var i in times){
+                    times[i] = times[i].replace(" ","");
+                    times[i] = times[i].replace(" ","");
+                    if(times[i].charAt(0) == "0"){
+                        times[i] = times[i].substring(1);			
+                    }		
+                }
+                newClass.startTime = times[0];
+                newClass.start = timeStringToTime(times[0]);
+                newClass.endTime = times[1];
+                newClass.end = timeStringToTime(times[1]);
+                newClass.color = $("#color2").val();
+                newClass.name = class_dict["subj_code"].concat(" ");
+                newClass.name = newClass.name.concat(classDict["course_no"]);
+                newClass.name = newClass.name.concat(" - ");
+                newClass.name = newClass.name.concat(classDict["sec"]);
+                newClass.crn = classDict["CRN"];
+                if(errorCheck(newClass)){
+                    addClassToLS(newClass);
+                    $("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+                    drawClasses();
+                    resetForm();
+                }    
+        }});
+    }
+    else{
+	    errorBox.text("you have to enter something!");
+    }
 }
 
 function createRequest(){
@@ -334,24 +342,14 @@ function createRequest(){
     var method = $("input[name='query']:checked").val();
    
     request["term"] = $("#term_select").val();
-
-    if(method == "crn"){
-        request["crn"] = $("#crn_input").val();
-    }
-    else if(method == "subject"){
-        request["subject"] = $("#subject_id").val();
-        request["subject_number"] = $("#subject_number").val();
-    }
-    else{
-        request["title"] = $("#crs_name").val();
-    }
-    console.log(method);
+    request["crn"] = $("#crn_input").val();
+    request["crs_num"] = $("#cls_number").val();
+    request["title"] = $("#crs_name").val();
 
     return request;
 }
 
-function setScheduleItem()
-{
+function setScheduleItem(){
     var newClass = new UnivClass();
     newClass.crn = $("#crn").val();	
     newClass.name = $("#class_name").val();

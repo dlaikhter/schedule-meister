@@ -1,3 +1,5 @@
+#deprecated
+
 import sys
 import json
 import urllib2
@@ -9,7 +11,7 @@ from Queue import Queue
 from threading import Thread
 from google.appengine.ext import ndb
 sys.path.insert(0, 'py_files')
-from utilities_meister import approximate_semester
+from utilities_meister import approximate_semester, scrape_classes
 
 
 def create_dict(day):
@@ -51,44 +53,21 @@ def get_classes():
             except:
                 pass
         courses = []
-        subject_page = BeautifulSoup(html)
         term = subject_page.find("td", {"class": "title"}).text.split(' for ')[1]
-        classes = subject_page.find("table", {"bgcolor": "#cccccc"})
-        classes = classes.findAll("tr")
-        for uni_class in classes:
-            if uni_class.find("a"):
-                course = {}
-                items = uni_class.findAll("td")
-                course["subj_code"] = items[0].text
-                course["course_no"] = items[1].text
-                course["type"] = items[2].text.replace('&amp;', '&')
-                course["sec"] = items[4].text
-                course["CRN"] = items[5].text
-                course["title"] = items[6].text.lower().replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'").split()
-                course["day_times"] = items[7]
-                course["instructor"] = items[len(items)-1].text
+        for course in scrape_classes(html):
+            new_class = UnivClass(id=course["CRN"],
+                                  term=term,
+                                  subj_code=course["subj_code"],
+                                  course_no=course["course_no"],
+                                  class_type=course["type"],
+                                  sec=course["sec"],
+                                  title=course["title"],
+                                  day_times="",
+                                  status=course["status"],
+                                  day_times=course["day_times"],
+                                  instructor=course["instructor"])
 
-                new_class = UnivClass(id=course["CRN"],
-                                      term=term,
-                                      subj_code=course["subj_code"],
-                                      course_no=course["course_no"],
-                                      class_type=course["type"],
-                                      sec=course["sec"],
-                                      title=course["title"],
-                                      day_times="",
-                                      instructor=course["instructor"])
-                
-                temp_dict = {}
-                for day in course["day_times"].findAll("tr"): 
-                    temp_dict = dict(temp_dict.items() + create_dict(day).items())
-                new_class.day_times = json.dumps(temp_dict)
-                
-                if items[5].find('p')["title"] == "FULL":
-                    new_class.status = "FULL"
-                else:
-                    new_class.status = "OK"
-
-                courses.append(new_class)
+            courses.append(new_class)
 
         ndb.put_multi(courses)
         url_queue2.task_done()

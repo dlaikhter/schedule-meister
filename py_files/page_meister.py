@@ -6,7 +6,7 @@ import json
 sys.path.insert(0, 'models')
 from univclass import UnivClass
 sys.path.insert(0, 'py_files')
-from utilities_meister import approximate_semester
+from utilities_meister import get_term_select, get_classes
 
 
 def class_to_json(course):
@@ -74,6 +74,7 @@ class MainPage(webapp2.RequestHandler):
         return jinja_environment
 
 
+#deprecated
 class Fetcher(webapp2.RequestHandler):
     def post(self):
         req = self.request.POST.items()
@@ -81,6 +82,13 @@ class Fetcher(webapp2.RequestHandler):
         self.response.out.write(query_classes(req_dict))
 
 
+class ClassQuery(webapp2.RequestHandler):
+    def post(self):
+        req = self.request.POST.items()
+        req_dict = dict(req)
+        self.response.out.write(get_classes(req_dict))
+
+
 class TermGetter(webapp2.RequestHandler):
     def get(self):
-        self.response.out.write(json.dumps(approximate_semester()))
+        self.response.out.write(json.dumps(get_term_select()))

@@ -177,7 +177,7 @@ margin:auto;
 margin-top:10px;
 margin-bottom:10px;
 }
-#subject_number{
+#cls_number{
 margin-left:20px
 }
 #crn_input{
@@ -312,4 +312,15 @@ top: 27%;
 right: 45%;	
 font-family:arial;
 visibility:hidden;
+}
+#results_container{
+position:fixed;
+background-color:white;
+width:80%;
+height:80%;
+top:10%;
+left:10%;
+border-radius:5px;
+border-style:solid;
+border-color:black;
 }
