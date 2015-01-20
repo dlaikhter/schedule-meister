@@ -1,4 +1,4 @@
-<html>
+<htm"l>
     <head>
 	<meta http-equiv="content-type" content="text/html; charset=windows-1252">
 	<title>schedule-meister</title>
@@ -211,14 +211,52 @@
         </div>
         <canvas width="2400" height="1300" id="schedule">
 	    </canvas>
-	    <span style="margin-top:50px">version 0.4  a better <i>better</i> webtms</span>
+	    <span style="margin-top:50px">version 0.5  a better <i>better</i> webtms</span>
 
         <div id="loading"></div>
         <div id="load_text">loading...</div>
         
         <div id="results_container">
-            <div id="results"></div>
-            <div id="result_info">
+            <div id="close_results">X</div>
+            <div id="results_and_info_container">
+                <div id="results_wrapper">    
+                    <div id="header">
+                        <div class="header_item" style="width:13%">subj</div>
+                        <div class="header_item" style="width:13%">code</div>
+                        <div class="header_item" style="width:40%">name</div>
+                        <div class="header_item" style="width:13%">sec</div>
+                        <div class="header_item" style="width:21%; border-right-style:none">type</div>
+                    </div> 
+                    <div id="results">
+                        <div id="result">
+                            <div class="result_item" style="width:13%">subj</div>
+                            <div class="result_item" style="width:13%">code</div>
+                            <div class="result_item" style="width:40%">name</div>
+                            <div class="result_item" style="width:13%">sec</div>
+                            <div class="result_item" style="width:21%; border-right-style:none">type</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="results_info">
+                    <div id="info_left">
+                        <span>crn: </span>
+                        <span id="crn_info"></span>
+                        <br>
+                        <span>capacity: </span>
+                        <span id="capacity_info"></span>
+                        <br>
+                        <span>fits in schedule: </span>
+                        <span id="fit_info"></span>
+                        <br> 
+                        <span>more info: </span>
+                        <span id="more_info"></span> 
+                    </div>
+                    <div id="info_right">
+                        <span>day/times: </span>
+                        <div>
+                    </div>
+                </div>
+                <div id="add_query_class"></div>
             </div>
         </div>
     </body>
