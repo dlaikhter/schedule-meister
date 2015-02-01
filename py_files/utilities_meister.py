@@ -32,6 +32,8 @@ def scrape_classes(html):
             course["type"] = items[2].text.replace('&amp;', '&')
             course["sec"] = items[3].text
             course["CRN"] = items[4].text
+            course["class_page"] = items[4].find('a')["href"]
+            course["status"] = items[4].find('p')["title"]
             course["title"] = items[5].text.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'")
             course["day_times"] = items[6]
             course["instructor"] = items[len(items)-1].text
@@ -41,7 +43,6 @@ def scrape_classes(html):
                 temp_dict = dict(temp_dict.items() + create_dict(day).items())
             course["day_times"] = temp_dict
 
-            course["status"] = items[4].find('p')["title"]
             courses.append(course)
 
     return courses

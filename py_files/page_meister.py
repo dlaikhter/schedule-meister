@@ -86,7 +86,7 @@ class ClassQuery(webapp2.RequestHandler):
     def post(self):
         req = self.request.POST.items()
         req_dict = dict(req)
-        self.response.out.write(get_classes(req_dict))
+        self.response.out.write(json.dumps(get_classes(req_dict)))
 
 
 class TermGetter(webapp2.RequestHandler):

@@ -4,12 +4,13 @@ var hourStart = "8:00am"
 var hourEnd = "10:00pm"
 var timeMin = timeStringToTime(hourStart);
 var timeMax = timeStringToTime(hourEnd);
+var queryResults = [];
 
 $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
     var clickeable = true;
-     
+
     $("#ui2").hide();
     $(".time_entry").hide(); 
     $(".day_choice")
@@ -82,7 +83,11 @@ function(){
 	    $(this).addClass('selected_day');
 	}
     });
-   
+    
+    $("#close_results").click(function(){
+        $("#results_container").hide();
+    });
+
     $(".remove_day")
     .click(function(e){
 	$(this).parent().parent().removeClass('selected_day');
@@ -128,22 +133,28 @@ function(){
             }
         }
     });
+     
+    $("#results").on('mousedown', '.result', function(){
+        if(!$(this).hasClass("selected_result")){
+            $(".selected_result").removeClass("selected_result");
+            $(this).addClass("selected_result");
+            setResultInfo($(this).attr("result_id"));
+        }
+    });
+    
+    $("#add_query_class").click(function(){
+        index = parseInt($(".selected_result").attr("result_id"));
+        addQueryClass(queryResults[index]);
+        $("#results_container").hide();
+    });
+    
     checkLocalStorage();
     clearCanvas();	
     drawCanvas();
     getClasses();
     canvas.onclick = function(e){clickClass(e, canvas)}
-    addSubjects();
     addTerms();
 });
-
-function addSubjects(){
-    var subjects = ['select', 'ADM', 'ACCT', 'AE', 'AFAS', 'ANAT', 'ANIM', 'ANTH', 'ARBC', 'ARCH', 'ARTH', 'ARTS', 'BACS', 'BIO', 'BLAW', 'BMES', 'BUSN', 'CAE', 'CAEE', 'CAT', 'CFTP', 'CHE', 'CHEC', 'CHEM', 'CHIN', 'CI', 'CIE', 'CIT', 'CIVC', 'CIVE', 'CJ', 'CMGT', 'COM', 'CRTV', 'CS', 'CSDN', 'CST', 'CT', 'CULA', 'DANC', 'DIGM', 'DSMR', 'EAM', 'ECE', 'ECEC', 'ECEE', 'ECEL', 'ECEP', 'ECES', 'ECET', 'ECON', 'EDAE', 'EDAM', 'EDEX', 'EDGI', 'EDHE', 'EDLS', 'EDLT', 'EDPO', 'EDUC', 'EET', 'EGMT', 'EHRD', 'ELL', 'EMER', 'ENGL', 'ENGR', 'ENTP', 'ENVE', 'ENVS', 'ESTM', 'ET', 'EXAM', 'FASH', 'FDSC', 'FIN', 'FMST', 'FMVD', 'FREN', 'GEO', 'GER', 'GMAP', 'GSTD', 'HBRW', 'HIST', 'HNRS', 'HRM', 'HSAD', 'HSCI', 'HSM', 'HUM', 'IAS', 'INDE', 'INFO', 'INTB', 'INTR', 'IPS', 'ITAL', 'JAPN', 'JUDA', 'KOR', 'LANG', 'LING', 'MATE', 'MATH', 'MBC', 'MEM', 'MET', 'MGMT', 'MHT', 'MIP', 'MIS', 'MKTG', 'MLSC', 'MTED', 'MUSC', 'MUSL', 'MUSM', 'NFS', 'NHP', 'NURS', 'OPM', 'OPR', 'ORGB', 'PA', 'PBHL', 'PHEV', 'PHGY', 'PHIL', 'PHTO', 'PHYS', 'PLCY', 'PMGT', 'POM', 'PORT', 'PRMT', 'PROD', 'PROJ', 'PRST', 'PSCI', 'PSY', 'PTRS', 'RADI', 'REAL', 'RSCH', 'RUSS', 'SCRP', 'SCTS', 'SMT', 'SOC', 'SPAN', 'STAT', 'STS', 'SYSE', 'TAX', 'THTR', 'TVIE', 'TVMN', 'TVPR', 'UNIV', 'VSCM', 'VSST', 'WBDV', 'WEST', 'WMGD', 'WMST', 'WRIT'];
-    
-    for(var i in subjects){
-        $('#subject_id').append($('<option></option>').val(subjects[i]).html(subjects[i]));
-    }
-}
 
 function addTerms(){
     $.ajax({url:"/term/",
@@ -153,7 +164,7 @@ function addTerms(){
             for(var key in termDict){
                 $("#term_select").append($('<option></option>').val(key).html(termDict[key]));
             }
-            }});
+        }});
 }
 
 function drawCanvas(){
@@ -257,7 +268,7 @@ function clickClass(e, canvas){
     mouse_y = (e.clientY - rect.top)*2;
 
     for(classKey in classes){
-        uniClass = classes[ClassKey];
+        uniClass = classes[classKey];
         for(timeKey in uniClass.classTimes){
             day = uniClass.classTimes[timeKey];
             x = 95*2 + ((getDayNum(timeKey))*(graphWidth/7)*2) + 2;
@@ -276,64 +287,85 @@ function clickClass(e, canvas){
 }
 
 function getDayNum(day){
-    numArray = ["M", "T", "W", "R", "F", "S", "SU"];
-    return numArray.indexOf(day);       
+    weekArray = ["M", "T", "W", "R", "F", "S", "SU"];
+    return weekArray.indexOf(day);       
+}
+
+function addQueriedClass(){
+    var newClass = new UnivClass();		
+    var days = classDict["days"];
+    var daysOfClass = [];
+    var times = classDict["time"];		
+    var week = ['M','T','W','R','F','S'];
+    for(var i in week){				
+        if(days.search(week[i]) != -1){
+            daysOfClass.push(i);
+        }
+    }
+    newClass.daysOfWeek = daysOfClass;
+    times = times.split("-");
+    for(var i in times){
+        times[i] = times[i].replace(" ","");
+        times[i] = times[i].replace(" ","");
+        if(times[i].charAt(0) == "0"){
+            times[i] = times[i].substring(1);			
+        }		
+    }
+    newClass.startTime = times[0];
+    newClass.start = timeStringToTime(times[0]);
+    newClass.endTime = times[1];
+    newClass.end = timeStringToTime(times[1]);
+    newClass.color = $("#color2").val();
+    newClass.name = class_dict["subj_code"].concat(" ");
+    newClass.name = newClass.name.concat(classDict["course_no"]);
+    newClass.name = newClass.name.concat(" - ");
+    newClass.name = newClass.name.concat(classDict["sec"]);
+    newClass.crn = classDict["CRN"];
+    if(errorCheck(newClass)){
+        newClass.id = createUniqueId();
+        addClassToLS(newClass);
+        $("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
+        drawClasses();
+        resetForm();
+    }    
 }
 
 function queryClasses(){
 	var request = createRequest();
-    
     var count = 0;
+    queryResults = []; 
+    $(".result").remove();
+
     for(var i in request){
-        if(request[i] === ""){
-            count++;
+        if(request[i] == ""){
+            count += 1;
         }
     }
     if(count < 3){
+        $("#error_box").text("");
+        $("#loading").fadeToggle();
+        $("#load_text").fadeToggle();
         $.ajax({url:"/get_class/",
             type:'POST',
-            data: request, 
+            data:request, 
+            timeout:10000,
+            error: function(){
+                $("#loading").fadeToggle();
+                $("#load_text").fadeToggle();
+                $("#errorBox").text("request timed out");
+            },
             success: function(data){
+                $("#loading").fadeToggle();
+                $("#load_text").fadeToggle();
+                $("#results_container").show();
                 var classDict = JSON.parse(data);
-                var newClass = new UnivClass();		
-                var days = classDict["days"];
-                var daysOfClass = [];
-                var times = classDict["time"];		
-                var week = ['M','T','W','R','F','S'];
-                for(var i in week){				
-                    if(days.search(week[i]) != -1){
-                        daysOfClass.push(i);
-                    }
-                }
-                newClass.daysOfWeek = daysOfClass;
-                times = times.split("-");
-                for(var i in times){
-                    times[i] = times[i].replace(" ","");
-                    times[i] = times[i].replace(" ","");
-                    if(times[i].charAt(0) == "0"){
-                        times[i] = times[i].substring(1);			
-                    }		
-                }
-                newClass.startTime = times[0];
-                newClass.start = timeStringToTime(times[0]);
-                newClass.endTime = times[1];
-                newClass.end = timeStringToTime(times[1]);
-                newClass.color = $("#color2").val();
-                newClass.name = class_dict["subj_code"].concat(" ");
-                newClass.name = newClass.name.concat(classDict["course_no"]);
-                newClass.name = newClass.name.concat(" - ");
-                newClass.name = newClass.name.concat(classDict["sec"]);
-                newClass.crn = classDict["CRN"];
-                if(errorCheck(newClass)){
-                    addClassToLS(newClass);
-                    $("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
-                    drawClasses();
-                    resetForm();
-                }    
+               
+                queryResults = dictToUnivClass(classDict);
+                addToResults(queryResults); 
         }});
     }
     else{
-	    errorBox.text("you have to enter something!");
+	    $("#error_box").text("you have to enter something!");
     }
 }
 
@@ -347,6 +379,160 @@ function createRequest(){
     request["title"] = $("#crs_name").val();
 
     return request;
+}
+
+function addToResults(list){
+    var result;
+    var html;
+    var element;
+    var classTemplate = ['<div result_id="%id" class="result %fit">',
+                         '<div class="result_item" style="width:7%">%subj</div>',
+                         '<div class="result_item" style="width:7%">%code</div>',
+                         '<div class="result_item" style="width:40%">%name</div>',
+                         '<div class="result_item" style="width:7%">%sec</div>',
+                         '<div class="result_item" style="width:18%">%type</div>',
+                         '<div class="result_item" style="width:21%; border-right-style:none">%cap</div>',
+                         '</div>'].join("");
+    
+    for(var i in list){
+        result = list[i];
+        html = classTemplate;
+        var re = new RegExp("%fit", 'g');
+        if(classOverlap(result) !== ""){
+            html = html.replace(re, "not_fit");
+        }
+        else{
+            html = html.replace(re, "fit");
+        }
+        html = html.replace("%id", i);
+        html = html.replace("%subj", result.subjCode);
+        html = html.replace("%code", result.courseNo);
+        html = html.replace("%name", result.name);
+        html = html.replace("%sec", result.sec);
+        html = html.replace("%type", result.type);
+        html = html.replace("%cap", result.stat);
+        element = $.parseHTML(html);
+        $("#results").append(element);
+    }
+}
+
+function dictToUnivClass(classDict){
+    var dict;
+    var uClassArr = [];
+    for(var i in classDict){
+        dict = classDict[i];
+        var newClass = new UnivClass();
+        newClass.crn = dict["CRN"];
+        newClass.name = dict["title"];
+        newClass.instructor = dict["instructor"];
+        newClass.classTimes = convertToClassTimes(dict["day_times"]);
+        newClass.type = dict["type"];
+        newClass.sec = dict["sec"];
+        newClass.classPage = dict["class_page"];
+        newClass.stat = dict["status"];
+        newClass.subjCode = dict["subj_code"];
+        newClass.courseNo = dict["course_no"];
+        newClass.color = $("#color1").css('background-color'); 
+        uClassArr.push(newClass);
+    }
+    return uClassArr;
+}
+
+function convertToClassTimes(dict){
+    for(var i in dict){
+        var timeDict;
+        var times = dict[i];
+        var updatedTimes = {};
+        var re = new RegExp(" ", 'g')
+        times = times.replace(re, "").split("-");
+        updatedTimes["start"] = times[0];
+        updatedTimes["startTime"] = timeStringToTime(times[0]);
+        updatedTimes["end"] = times[1];
+        updatedTimes["endTime"] = timeStringToTime(times[1]);
+        dict[i] = updatedTimes;
+    }
+    return dict
+}
+
+function setResultInfo(id){
+    var index = parseInt(id);
+    var uniClass = queryResults[index];
+    var overlap = classOverlap(uniClass); 
+    var times = uniClass.classTimes;
+
+    $("#crn_info").html(uniClass.crn);
+    if(overlap === ""){
+        $("#fit_info").html("yes");
+    }
+    else{
+        $("#fit_info").html("conflict with " + overlap); 
+    }
+    $("#more_info").html("webtms").attr("href", 'https://duapp2.drexel.edu' + uniClass.classPage);
+    
+    var classTimes = convertTimesToString(times);
+    console.log(classTimes);
+    
+    for(var i = 0; i < 5; i++){
+        $("#info_weekday"+i.toString()).text('');
+        $("#info_time"+i.toString()).text('');
+    }
+
+    if(classTimes.length === 0){
+        $("#info_weekday0").text("TBD");
+    }
+    else{
+        var timeItem;
+
+        for(var i in classTimes){
+            console.log(i);
+            timeItem = classTimes[i];
+            $("#info_weekday"+i.toString()).text(timeItem[0]);
+            $("#info_time"+i.toString()).text(timeItem[1]);
+        }
+    }
+}
+
+function convertTimesToString(times){
+    var days = ['M', 'T', 'W', 'R', 'F', 'S'];
+    var completeArr = [];
+    var time;
+    var compareTime;
+    var broke;
+
+    for(var i in days){
+        if(days[i] in times){
+            time = times[days[i]];
+            time = time["start"] + " - " + time["end"];
+            broke = false;
+            for(var j in completeArr){
+                compareTime = completeArr[j][1];
+                if(time == compareTime){
+                    completeArr[j][0] += days[i];
+                    broke = true;
+                    break;
+                }
+            }
+            if(!broke){
+                completeArr.push([days[i], time]);
+            }
+        }
+    }
+    return completeArr;
+}
+
+function addQueryClass(newClass){
+    var classMatch = classOverlap(newClass);
+    
+    if(classMatch === ""){
+	    newClass.id = createUniqueId();
+        addClassToLS(newClass);
+	    $("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
+	    drawClasses();
+	    resetForm();
+    }
+    else{
+        $("#error_box").text("overlaps with class: " + classMatch);
+    }
 }
 
 function setScheduleItem(){
@@ -406,10 +592,7 @@ function errorCheck(newClass){
     else if(Object.keys(newClass.classTimes).length === 0){
     errorBox.text("you must select at least one day of the week");
     }
-    else if(sameClassName(newClass)){
-	errorBox.text("can't have a class with the same name");
-    }
-    else if(classMatch != false){
+    else if(classMatch !== ""){
 	errorBox.text("overlaps with class: " + classMatch);
     }
     else{
@@ -456,16 +639,6 @@ function verifyTimeFormat(newClass){
     }
 }
 
-function sameClassName(newClass){
-    var classes = JSON.parse(localStorage['classes']);
-    for(classKey in classes){
-	if(classes[classKey].name === newClass.name){
-	    return true;
-	}
-    }
-    return false;
-}
-
 function classOverlap(newClass){
     var compareClass;
     var classes = JSON.parse(localStorage['classes']);
@@ -482,7 +655,7 @@ function classOverlap(newClass){
             }
         }
     }
-    return false;
+    return "";
 }
 
 function resetForm(){
@@ -508,8 +681,8 @@ function getClasses(){
         var classes = JSON.parse(localStorage['classes']);
 	for(key in classes){
 	    try{
-	        if(classes[key].version < 0.4) throw "outdated UnivClass object";
-	        $("#class_select").append( $('<option></option>').val(classes[key].name).html(classes[key].name +" - " + classes[key].crn));
+	        if(classes[key].version < 0.5) throw "outdated UnivClass object";
+	        $("#class_select").append( $('<option></option>').val(classes[key].id).html(classes[key].name +" - " + classes[key].crn));
 	        drawClasses();
 	    }
 	    catch(err){
@@ -526,7 +699,7 @@ function getClasses(){
 
 function addClassToLS(newClass){
     classes = JSON.parse(localStorage["classes"]);
-    classes[newClass.name] = newClass;
+    classes[newClass.id] = newClass;
     localStorage.setItem("classes", JSON.stringify(classes));
 }
 
@@ -543,15 +716,37 @@ function checkLocalStorage(){
 }
 
 function clearLocalStorage(){
-   localStorage.setItem("classes", JSON.stringify({}));
+    localStorage.setItem("classes", JSON.stringify({}));
 }
 
+function createUniqueId(){
+    var classes = [];
+    for(var i in JSON.parse(localStorage.getItem("classes"))){
+        classes.push(parseInt(i));
+    }
+    
+    console.log(classes);
+    if(classes.length != 0){
+        return Math.max.apply(null, classes) + 1;
+    }
+    else{
+        return 0;
+    }
+}
 function UnivClass(){
     this.classTimes;
     this.name;
+    this.instructor;
+    this.type;
+    this.sec;
+    this.classPage;
+    this.stat;
+    this.subjCode;
+    this.courseNo;
     this.color;
     this.crn;
-    this.version = 0.4;
+    this.version = 0.5;
+    this.id; 
 }
 
 function timeStringToTime(timeString){
@@ -573,6 +768,5 @@ function timeStringToTime(timeString){
         hour = parseInt(timeSplit[0]);
     }
     min = parseInt(timeSplit[1]);
-
     return hour*60+min;
 }
