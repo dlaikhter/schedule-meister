@@ -162,9 +162,11 @@ function addTerms(){
     $.ajax({url:"/term/",
 		type:'GET',
 		success: function(data){
-		    var termDict = JSON.parse(data);
-            for(var key in termDict){
-                $("#term_select").append($('<option></option>').val(key).html(termDict[key]));
+		    var terms = JSON.parse(data);
+            var term;
+            for(var i in terms){
+                term  = terms[i];
+                $("#term_select").append($('<option></option>').val(term['val']).html(term['term']));
             }
         }});
 }
@@ -293,45 +295,6 @@ function getDayNum(day){
     return weekArray.indexOf(day);       
 }
 
-function addQueriedClass(){
-    var newClass = new UnivClass();		
-    var days = classDict["days"];
-    var daysOfClass = [];
-    var times = classDict["time"];		
-    var week = ['M','T','W','R','F','S'];
-    for(var i in week){				
-        if(days.search(week[i]) != -1){
-            daysOfClass.push(i);
-        }
-    }
-    newClass.daysOfWeek = daysOfClass;
-    times = times.split("-");
-    for(var i in times){
-        times[i] = times[i].replace(" ","");
-        times[i] = times[i].replace(" ","");
-        if(times[i].charAt(0) == "0"){
-            times[i] = times[i].substring(1);			
-        }		
-    }
-    newClass.startTime = times[0];
-    newClass.start = timeStringToTime(times[0]);
-    newClass.endTime = times[1];
-    newClass.end = timeStringToTime(times[1]);
-    newClass.color = $("#color2").val();
-    newClass.name = class_dict["subj_code"].concat(" ");
-    newClass.name = newClass.name.concat(classDict["course_no"]);
-    newClass.name = newClass.name.concat(" - ");
-    newClass.name = newClass.name.concat(classDict["sec"]);
-    newClass.crn = classDict["CRN"];
-    if(errorCheck(newClass)){
-        newClass.id = createUniqueId();
-        addClassToLS(newClass);
-        $("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
-        drawClasses();
-        resetForm();
-    }    
-}
-
 function queryClasses(){
 	var request = createRequest();
     var count = 0;
@@ -435,7 +398,7 @@ function dictToUnivClass(classDict){
         newClass.stat = dict["status"];
         newClass.subjCode = dict["subj_code"];
         newClass.courseNo = dict["course_no"];
-        newClass.color = $("#color1").css('background-color'); 
+        newClass.color = $("#color2").css('background-color'); 
         uClassArr.push(newClass);
     }
     return uClassArr;
@@ -473,7 +436,6 @@ function setResultInfo(id){
     $("#more_info").html("webtms").attr("href", 'https://duapp2.drexel.edu' + uniClass.classPage);
     
     var classTimes = convertTimesToString(times);
-    console.log(classTimes);
     
     for(var i = 0; i < 5; i++){
         $("#info_weekday"+i.toString()).text('');
@@ -487,7 +449,6 @@ function setResultInfo(id){
         var timeItem;
 
         for(var i in classTimes){
-            console.log(i);
             timeItem = classTimes[i];
             $("#info_weekday"+i.toString()).text(timeItem[0]);
             $("#info_time"+i.toString()).text(timeItem[1]);
@@ -566,8 +527,9 @@ function setScheduleItem(){
         });
     }
     if(errorCheck(newClass)){
-	addClassToLS(newClass);
-	$("#class_select").append( $('<option></option>').val(newClass.name).html(newClass.name + " - " + newClass.crn));
+        newClass.id = createUniqueId();
+        addClassToLS(newClass);
+	$("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
 	drawClasses();
 	resetForm();
     }
@@ -575,6 +537,7 @@ function setScheduleItem(){
 
 function removeClass(){
     var deletedItem = $("#class_select").val();
+    console.log(deletedItem);
     removeClassFromLS(deletedItem);
     $("#class_select option:selected").remove();
     drawClasses();
@@ -650,13 +613,10 @@ function classOverlap(newClass){
     var newEnd;
     var classes = JSON.parse(localStorage['classes']);
     
-    console.log("new" + newClass.name); 
-    console.log(newClass.classTimes); 
     for(classKey in classes){
         compareClass = classes[classKey]; 
         for(day in compareClass.classTimes){
 	        if(day in newClass.classTimes){
-		        console.log("YES");
                 newStart = newClass.classTimes[day]['startTime'];
                 newEnd = newClass.classTimes[day]['endTime'];
                 compareStart = compareClass.classTimes[day]['startTime'];
@@ -693,7 +653,7 @@ function getClasses(){
         var classes = JSON.parse(localStorage['classes']);
 	for(key in classes){
 	    try{
-	        if(classes[key].version < 0.5) throw "outdated UnivClass object";
+	        if(classes[key].version < 0.51) throw "outdated UnivClass object";
 	        $("#class_select").append( $('<option></option>').val(classes[key].id).html(classes[key].name +" - " + classes[key].crn));
 	        drawClasses();
 	    }
@@ -737,7 +697,6 @@ function createUniqueId(){
         classes.push(parseInt(i));
     }
     
-    console.log(classes);
     if(classes.length != 0){
         return Math.max.apply(null, classes) + 1;
     }
@@ -757,7 +716,7 @@ function UnivClass(){
     this.courseNo;
     this.color;
     this.crn;
-    this.version = 0.5;
+    this.version = 0.51;
     this.id; 
 }
 

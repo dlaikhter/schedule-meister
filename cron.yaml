@@ -1,7 +1,7 @@
 cron:
-- description: scraper
-  url: /scraper
-  schedule: every monday 9:00
+#- description: scraper
+#  url: /scraper
+#  schedule: every monday 9:00
 
 #- description: deleter
 #  url: /deleter

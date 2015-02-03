@@ -72,23 +72,20 @@ def get_term_select():
     select = bs.find('select', id="term")
     terms = {}
     for term in select.findAll('option'):
-        terms[term["value"]] = term.text
+        terms[term.text] = term["value"]
 
-    terms.pop("0")
-    keys = []
-    current_terms = approximate_semester().values()
-    for key, value in terms.iteritems():
-        if value not in current_terms:
-            keys.append(key)
+    returning_terms = []
+    term_values = terms.keys()
+    for semester in  approximate_semester():
+        if semester in term_values:
+            term = {'val':terms[semester],'term':semester}
+            returning_terms.append(term)
 
-    for key in keys:
-        terms.pop(key)
-
-    return terms
+    return returning_terms
 
 
 def approximate_semester():
-    approximation = {}
+    approximation = []
 
     semester = "{season} Semester {start}-{end}"
     quarter = "{season} Quarter {start}-{end}"
@@ -111,24 +108,42 @@ def approximate_semester():
     next_season = full_seasons[index+2]
 
     if season == 'Fall':
-        approximation['current_quarter'] = quarter.format(season=season, start=str(year)[2:], end=str(year+1)[2:])
-        approximation['current_semester'] = semester.format(season=season, start=str(year)[2:], end=str(year+1)[2:])
-        approximation['previous_quarter'] = quarter.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:])
-        approximation['previous_semester'] = semester.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:])
-        approximation['next_quarter'] = quarter.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:])
-        approximation['next_semester'] = semester.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:])
+        #next quarter
+        approximation.append(quarter.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:]))
+        #current quarter
+        approximation.append(quarter.format(season=season, start=str(year)[2:], end=str(year+1)[2:]))
+        #previous quarter
+        approximation.append(quarter.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:]))
+        #next semester
+        approximation.append(semester.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:]))
+        #current semester
+        approximation.append(semester.format(season=season, start=str(year)[2:], end=str(year+1)[2:]))
+        #previous semester
+        approximation.append(semester.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:]))
     else:
-        approximation['current_quarter'] = quarter.format(season=season, start=str(year-1)[2:], end=str(year)[2:])
-        approximation['current_semester'] = semester.format(season=season, start=str(year-1)[2:], end=str(year)[2:])
-        approximation['previous_quarter'] = quarter.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:])
-        approximation['previous_semester'] = semester.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:])
-
+        #next quarter
         if season == 'Summer':
-            approximation['next_quarter'] = quarter.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:])
-            approximation['next_semester'] = semester.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:])
+            approximation.append(quarter.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:]))
         else:
-            approximation['next_quarter'] = quarter.format(season=next_season, start=str(year-1)[2:], end=str(year)[2:])
-            approximation['next_semester'] = semester.format(season=next_season, start=str(year-1)[2:], end=str(year)[2:])
+            approximation.append(quarter.format(season=next_season, start=str(year-1)[2:], end=str(year)[2:]))
+
+        #current quarter
+        approximation.append(quarter.format(season=season, start=str(year-1)[2:], end=str(year)[2:]))
+        #previous quarter
+        approximation.append(quarter.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:]))
+
+
+        #next semester
+        approximation.append(semester.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:]))
+        if season == 'Summer':
+            approximation.append(semester.format(season=next_season, start=str(year)[2:], end=str(year+1)[2:]))
+        else:
+            approximation.append(semester.format(season=next_season, start=str(year-1)[2:], end=str(year)[2:]))
+
+        #current semester
+        approximation.append(semester.format(season=season, start=str(year-1)[2:], end=str(year)[2:]))
+        #previous semester
+        approximation.append(semester.format(season=prev_season, start=str(year-1)[2:], end=str(year)[2:]))
 
     return approximation
 
