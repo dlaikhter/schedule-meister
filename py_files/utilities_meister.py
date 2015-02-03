@@ -1,4 +1,5 @@
 from datetime import date
+import urllib
 import urllib2
 import sys
 sys.path.insert(0, 'libs')
@@ -49,14 +50,19 @@ def scrape_classes(html):
 
 
 def get_classes(req_dict):
-    crn = req_dict["crn"]
-    crs_name = req_dict["title"]
-    term = req_dict["term"]
-    crs_num = req_dict["crs_num"]
-    erl = "https://duapp2.drexel.edu/webtms_du/app?page=Home&component=searchForm&formids=term%2CcourseName%2CcrseNumb%2Ccrn&courseName={crs_name}&service=direct&submitname=&term={term}&crn={crn}&CrsNumb={crs_num}&submitmode=submit"
-    erl = erl.format(crn=crn, term=term, crs_num=crs_num, crs_name=crs_name)
-
-    html = urllib2.urlopen(url=erl).read()
+    params = {'component': 'searchForm',
+              'courseName': req_dict["title"],
+              'crn': req_dict["crn"],
+              'crseNumb': req_dict["crs_num"],
+              'formids': 'term,courseName,crseNumb,crn',
+              'page': 'Home',
+              'service': 'direct',
+              'submitmode': 'submit',
+              'submitname': '',
+              'term': req_dict["term"],
+              }
+    url = "https://duapp2.drexel.edu/webtms_du/app"
+    html = urllib2.urlopen(url, urllib.urlencode(params))
     return scrape_classes(html)
 
 
@@ -70,9 +76,9 @@ def get_term_select():
 
     terms.pop("0")
     keys = []
-    current_terms  = approximate_semester().values()
+    current_terms = approximate_semester().values()
     for key, value in terms.iteritems():
-        if not value in current_terms:
+        if value not in current_terms:
             keys.append(key)
 
     for key in keys:
@@ -128,4 +134,8 @@ def approximate_semester():
 
 
 if __name__ == '__main__':
-    print get_term_select()
+    req_dict = {'crn':'',
+                'title':'',
+                'term':5,
+                'crs_num':101}
+    print get_classes(req_dict)
