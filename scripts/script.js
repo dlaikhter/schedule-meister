@@ -86,6 +86,7 @@ function(){
     
     $("#close_results").click(function(){
         $("#results_container").hide();
+        $("body").css("overflow","auto");
     });
 
     $(".remove_day")
@@ -145,6 +146,7 @@ function(){
     $("#add_query_class").click(function(){
         index = parseInt($(".selected_result").attr("result_id"));
         addQueryClass(queryResults[index]);
+        $("body").css("overflow","auto");
         $("#results_container").hide();
     });
     
@@ -358,6 +360,7 @@ function queryClasses(){
                 $("#loading").fadeToggle();
                 $("#load_text").fadeToggle();
                 $("#results_container").show();
+                $("body").css('overflow', 'hidden');
                 var classDict = JSON.parse(data);
                
                 queryResults = dictToUnivClass(classDict);
@@ -641,16 +644,25 @@ function verifyTimeFormat(newClass){
 
 function classOverlap(newClass){
     var compareClass;
+    var compareStart;
+    var compareEnd;
+    var newStart;
+    var newEnd;
     var classes = JSON.parse(localStorage['classes']);
     
+    console.log("new" + newClass.name); 
+    console.log(newClass.classTimes); 
     for(classKey in classes){
         compareClass = classes[classKey]; 
         for(day in compareClass.classTimes){
-	    if(day in newClass.classTimes){
-		newClassTimes = newClass.classTimes[day]
-                compareClassTimes = compareClass.classTimes[day]
-                if(!(compareClass.start >=  newClass.end ||  compareClass.end <=  newClass.start)){
-		    return compareClass.name;
+	        if(day in newClass.classTimes){
+		        console.log("YES");
+                newStart = newClass.classTimes[day]['startTime'];
+                newEnd = newClass.classTimes[day]['endTime'];
+                compareStart = compareClass.classTimes[day]['startTime'];
+                compareEnd = compareClass.classTimes[day]['endTime'];
+                if((compareStart <  newEnd && compareStart >= newStart) || (compareEnd <=  newEnd &&  compareEnd > newStart)){
+                    return compareClass.name;
                 }
             }
         }
