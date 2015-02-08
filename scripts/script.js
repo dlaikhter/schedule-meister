@@ -322,6 +322,7 @@ function queryClasses(){
             success: function(data){
                 $("#loading").fadeToggle();
                 $("#load_text").fadeToggle();
+                clearResultInfo(); 
                 $("#results_container").show();
                 $("body").css('overflow', 'hidden');
                 var classDict = JSON.parse(data);
@@ -418,6 +419,53 @@ function convertToClassTimes(dict){
         dict[i] = updatedTimes;
     }
     return dict
+}
+
+function setResultInfo(id){
+    var index = parseInt(id);
+    var uniClass = queryResults[index];
+    var overlap = classOverlap(uniClass); 
+    var times = uniClass.classTimes;
+
+    $("#crn_info").html(uniClass.crn);
+    if(overlap === ""){
+        $("#fit_info").html("yes");
+    }
+    else{
+        $("#fit_info").html("conflict with " + overlap); 
+    }
+    $("#more_info").html("webtms").attr("href", 'https://duapp2.drexel.edu' + uniClass.classPage);
+    
+    var classTimes = convertTimesToString(times);
+    
+    for(var i = 0; i < 5; i++){
+        $("#info_weekday"+i.toString()).text('');
+        $("#info_time"+i.toString()).text('');
+    }
+
+    if(classTimes.length === 0){
+        $("#info_weekday0").text("TBD");
+    }
+    else{
+        var timeItem;
+
+        for(var i in classTimes){
+            timeItem = classTimes[i];
+            $("#info_weekday"+i.toString()).text(timeItem[0]);
+            $("#info_time"+i.toString()).text(timeItem[1]);
+        }
+    }
+}
+
+function clearResultInfo(){
+    $("#crn_info").html("");
+    $("#fit_info").html("");
+    $("#more_info").html("");
+    
+    for(var i = 0; i < 5; i++){
+        $("#info_weekday"+i.toString()).text('');
+        $("#info_time"+i.toString()).text('');
+    }
 }
 
 function setResultInfo(id){
