@@ -627,13 +627,14 @@ function areClassTimesValid(newClass){
 }
 
 function verifyTimeFormat(newClass){
-    var pattern = '^[0-9]{1,2}(:\d\d)?(am|pm)';
+    var pattern = '^[0-9]{1,2}(:\\d\\d)?(am|pm)';
     
     for(var dayOfWeek in newClass.classTimes){
         var times = newClass.classTimes[dayOfWeek];
         var start = times['start'];
         var end = times['end'];
-        
+        console.log(start); 
+        console.log(pattern);
         if(start.search(pattern) == -1 || end.search(pattern) == -1){
             return false;
         }
@@ -641,11 +642,9 @@ function verifyTimeFormat(newClass){
         var startMinutes = parseInt(start.substring(start.length-4, start.length - 2));
         var endMinutes = parseInt(end.substring(end.length-4, end.length - 2));
         
-        console.log("THE HECK");
-        console.log(timeMin);
-        console.log(times['startTime']);
-
-        if(startMinutes > 60 || endMinutes > 60){
+        console.log(times);
+        console.log(startMinutes);
+        if(startMinutes >= 60 || endMinutes >= 60){
             return false;
         }
         else if(times['startTime'] >= timeMax || times['endTime'] > timeMax || times['startTime'] < timeMin || times['endTime'] <= timeMin){
