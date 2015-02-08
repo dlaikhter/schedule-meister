@@ -585,7 +585,6 @@ function setScheduleItem(){
 
 function removeClass(){
     var deletedItem = $("#class_select").val();
-    console.log(deletedItem);
     removeClassFromLS(deletedItem);
     $("#class_select option:selected").remove();
     drawClasses();
@@ -597,7 +596,7 @@ function errorCheck(newClass){
     if(!areClassTimesValid(newClass)){
 	errorBox.text("end time can't be before or the same as start time");
     }
-    else if(verifyTimeFormat(newClass)){
+    else if(!verifyTimeFormat(newClass)){
     errorBox.text("times aren't valid");
     }
     else if(newClass.name === ""){
@@ -628,8 +627,9 @@ function areClassTimesValid(newClass){
 }
 
 function verifyTimeFormat(newClass){
-    var pattern = '^[0-9]{1,2}:\d\d(am|pm)';
-    for (dayOfWeek in newClass.classTimes){
+    var pattern = '^[0-9]{1,2}(:\d\d)?(am|pm)';
+    
+    for(var dayOfWeek in newClass.classTimes){
         var times = newClass.classTimes[dayOfWeek];
         var start = times['start'];
         var end = times['end'];
@@ -640,17 +640,19 @@ function verifyTimeFormat(newClass){
         
         var startMinutes = parseInt(start.substring(start.length-4, start.length - 2));
         var endMinutes = parseInt(end.substring(end.length-4, end.length - 2));
-     
+        
+        console.log("THE HECK");
+        console.log(timeMin);
+        console.log(times['startTime']);
+
         if(startMinutes > 60 || endMinutes > 60){
             return false;
         }
         else if(times['startTime'] >= timeMax || times['endTime'] > timeMax || times['startTime'] < timeMin || times['endTime'] <= timeMin){
             return false;
         }
-        else{
-            return true;
-        }
     }
+    return true;
 }
 
 function classOverlap(newClass){
@@ -773,19 +775,22 @@ function timeStringToTime(timeString){
     var min;
     var am_pm = timeString.slice(timeString.length - 2,timeString.length);
     timeString = timeString.slice(0,timeString.length-2);
-    timeSplit = timeString.split(":");
-
+    if(timeString.length < 3){
+        hour = parseInt(timeString);
+        min = 0;
+    }
+    else{
+        timeSplit = timeString.split(":");
+        hour = parseInt(timeSplit[0]);
+        min = parseInt(timeSplit[1])
+    }
     if(am_pm == "pm"){
-        if(parseInt(timeSplit[0]) === 12){
+        if(timeSplit[0] === 12){
             hour = 12;
         }
         else{
-            hour = parseInt(timeSplit[0]) + 12;
+            hour = hour + 12;
         }
     }
-    else{
-        hour = parseInt(timeSplit[0]);
-    }
-    min = parseInt(timeSplit[1]);
     return hour*60+min;
 }
