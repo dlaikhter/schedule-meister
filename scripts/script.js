@@ -89,6 +89,11 @@ function(){
         $("body").css("overflow","auto");
     });
 
+    $("#close_popup").click(function(){
+        clearPopUpBox();
+        $("#popup_box").hide();
+    });
+    
     $(".remove_day")
     .click(function(e){
 	$(this).parent().parent().removeClass('selected_day');
@@ -283,11 +288,61 @@ function clickClass(e, canvas){
             max_y = y + height;
 
             if(mouse_x >= x && mouse_x <= max_x && mouse_y >= y && mouse_y >= y && mouse_y <= max_y){
-                alert(uniClass.name + "\n" + uniClass.crn);
+                openPopUpBox(uniClass);
                 break;
             }
         }
     }
+}
+
+function openPopUpBox(uniClass){
+    $('#popup_box').show();
+    $('#popup_header').html(uniClass.name);
+    if('crn' in uniClass){
+        $('#popup_crn').html(uniClass.crn);
+    }
+    if('instructor' in uniClass){
+        $('#popup_instructor').html(uniClass.instructor);
+    }
+    if('type' in uniClass){
+        $('#popup_type').html(uniClass.type);
+    }
+    if('sec' in uniClass){
+        $('#popup_sec').html(uniClass.sec);
+    }
+    if('subjCode' in uniClass){
+        $('#popup_subj').html(uniClass.subjCode);
+    }
+    if('courseNo' in uniClass){
+        $('#popup_code').html(uniClass.courseNo);
+    }
+
+    var classTimes = convertTimesToString(uniClass.classTimes);
+    
+    if(classTimes.length === 0){
+        $(".popup_date:eq(0)").text("TBD");
+    }       
+    else{   
+        var timeItem;
+    
+        for(var i in classTimes){
+            timeItem = classTimes[i];
+            $(".popup_date:eq("+i.toString()+")").text(timeItem[0]);
+            $(".popup_time:eq("+i.toString()+")").text(timeItem[1]);
+        }
+    }
+
+}
+
+function clearPopUpBox(){
+    $('popup_header').html('');
+    $('popup_info').html('');
+    $('popup_date').html('');
+    $('popup_time').html('');
+    for(var i = 0; i < 5; i++){
+        $(".popup_date"+i.toString()).text('');
+        $(".popup_time"+i.toString()).text('');
+    }   
 }
 
 function getDayNum(day){
@@ -633,8 +688,7 @@ function verifyTimeFormat(newClass){
         var times = newClass.classTimes[dayOfWeek];
         var start = times['start'];
         var end = times['end'];
-        console.log(start); 
-        console.log(pattern);
+        
         if(start.search(pattern) == -1 || end.search(pattern) == -1){
             return false;
         }
@@ -642,8 +696,6 @@ function verifyTimeFormat(newClass){
         var startMinutes = parseInt(start.substring(start.length-4, start.length - 2));
         var endMinutes = parseInt(end.substring(end.length-4, end.length - 2));
         
-        console.log(times);
-        console.log(startMinutes);
         if(startMinutes >= 60 || endMinutes >= 60){
             return false;
         }
