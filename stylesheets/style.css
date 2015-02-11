@@ -499,6 +499,7 @@ color:gray;
 width:98%;
 height:98%;
 margin: 0 auto;
+font-size:14px;
 }
 #close_popup{
 height:18px;
@@ -510,7 +511,6 @@ border-radius:100%;
 border-style:solid;
 border-color:gray;
 font-family:Arial;
-font-size:12px;
 font-weight:900;
 color:#7A8EFF;
 position:relative;
@@ -541,6 +541,7 @@ width:30%;
 .popup_info{
 width:70%;
 color:#BF85C9;
+text-align:center;
 }
 .popup_container div{
 height:30%;

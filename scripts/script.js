@@ -744,6 +744,8 @@ function resetForm(){
         $('.end_select').val('am');
     }
     else{
+        $('#startTime').val('');
+        $('#endTime').val('');
         $("#time_start").val("am");
         $("#time_end").val("am");
     }
