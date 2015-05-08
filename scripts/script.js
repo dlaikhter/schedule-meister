@@ -10,7 +10,8 @@ $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
     var clickeable = true;
-   
+
+
     $("#ui1").hide();
     $(".time_entry").hide(); 
     $(".day_choice")
@@ -65,8 +66,8 @@ function(){
             $(el).css('background-color','#'+hex);
             if(!bySetColor) $(el).val(hex);
     }})
-    .css('background-color', '#3289c7');
-	
+    setRandomColor($(".color_picker"));
+    
     $(".day")
     .click(function(){
 	var timeEntry = $(this).find(".time_entry")
@@ -345,6 +346,15 @@ function clearPopUpBox(){
     }   
 }
 
+function setRandomColor(colorUI){
+    var hue = Math.floor(Math.random() * 360); 
+    var sat = Math.floor((Math.random() * 60) + 40);
+    var val = Math.floor((Math.random() * 30) + 70); 
+    var hsl = ("hsl(" + hue + ", " + sat + "%, " + val + "%)");
+
+    colorUI.css("background-color", hsl);
+}
+
 function getDayNum(day){
     weekArray = ["M", "T", "W", "R", "F", "S", "SU"];
     return weekArray.indexOf(day);       
@@ -589,11 +599,12 @@ function addQueryClass(newClass){
     var classMatch = classOverlap(newClass);
     
     if(classMatch === ""){
-	    newClass.id = createUniqueId();
+	newClass.id = createUniqueId();
         addClassToLS(newClass);
-	    $("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
-	    drawClasses();
-	    resetForm();
+	$("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
+        setRandomColor($(".color_picker"));
+	drawClasses();
+	resetForm();
     }
     else{
         $("#error_box").text("overlaps with class: " + classMatch);
@@ -631,7 +642,8 @@ function setScheduleItem(){
         newClass.id = createUniqueId();
         addClassToLS(newClass);
 	$("#class_select").append( $('<option></option>').val(newClass.id).html(newClass.name + " - " + newClass.crn));
-	drawClasses();
+        setRandomColor($(".color_picker"));
+        drawClasses();
 	resetForm();
     }
 }
