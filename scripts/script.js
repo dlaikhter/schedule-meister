@@ -836,12 +836,13 @@ function timeStringToTime(timeString){
         min = parseInt(timeSplit[1])
     }
     if(am_pm == "pm"){
-        if(timeSplit[0] === 12){
+        if(timeSplit[0] == 12){
             hour = 12;
         }
         else{
             hour = hour + 12;
         }
     }
+    
     return hour*60+min;
 }
