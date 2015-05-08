@@ -10,7 +10,7 @@ $(document).ready(
 function(){
     var canvas = document.getElementById("schedule");
     var clickeable = true;
-
+   
     $("#ui1").hide();
     $(".time_entry").hide(); 
     $(".day_choice")
@@ -393,12 +393,10 @@ function queryClasses(){
 
 function createRequest(){
     var request = {};
-    var method = $("input[name='query']:checked").val();
-   
     request["term"] = $("#term_select").val();
-    request["crn"] = $("#crn_input").val();
-    request["crs_num"] = $("#cls_number").val();
-    request["title"] = $("#crs_name").val();
+    request["crn"] = $("#crn_input").val().trim();
+    request["crs_num"] = $("#cls_number").val().trim();
+    request["title"] = $("#crs_name").val().trim();
 
     return request;
 }
@@ -838,7 +836,7 @@ function timeStringToTime(timeString){
         min = parseInt(timeSplit[1])
     }
     if(am_pm == "pm"){
-        if(hour === 12){
+        if(timeSplit[0] === 12){
             hour = 12;
         }
         else{
