@@ -252,7 +252,7 @@ width:400px;
 margin:auto;
 background-color:white;
 }
-#button1{
+.button.selected{
 background-color:#B363B8;
 }
 #errorbox{
@@ -284,6 +284,7 @@ cursor:pointer;
 /* Rules below not implemented in browsers yet */
 -o-user-select: none;
 user-select: none;
+display:none;
 }
 #loading{
 opacity:0.2;

@@ -11,7 +11,7 @@ function(){
     var canvas = document.getElementById("schedule");
     var clickeable = true;
 
-    $("#ui2").hide();
+    $("#ui1").hide();
     $(".time_entry").hide(); 
     $(".day_choice")
     .click(function(){
@@ -113,22 +113,22 @@ function(){
 
     $(".button")
     .mouseover(function(){
-        if(!$(this).attr('selected')){
+        if(!$(this).hasClass('selected')){
             $(this).css('background-color', "#EBABDE");   
     }})
     .mouseout(function(){
-        if(!$(this).attr('selected')){
+        if(!$(this).hasClass('selected')){
             $(this).css('background-color', "#F089DB");   
     }});
                 
     $(".button").click(function(){
-	if(!$(this).attr('selected')){
-	    $("[class=button][selected]")
+	if(!$(this).hasClass('selected')){
+	    $(".button.selected")
             .css("background-color", "#F089DB")
-            .removeAttr("selected");
+            .removeClass("selected");
             $(this)
             .css("background-color","#B363B8")
-            .attr('selected', 'selected');
+            .addClass('selected');
             if($(this).attr('id') == 'button1'){
                 $("#ui1").show();
                 $("#ui2").hide();
